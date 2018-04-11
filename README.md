@@ -16,6 +16,8 @@ This work represents a small exploratory Slurm cluster using CentOS 7 based Dock
 
 ## Container Overview
 
+An example [docker-compose.yml](docker-compose.yml) file is provided that builds and deploys the diagramed topology
+
 <img width="90%" alt="Slurm cluster" src="https://user-images.githubusercontent.com/5332509/38642211-67a7e1a4-3da7-11e8-85a9-3394ad3c8cb6.png">
 
 Listing of participating containers with FQDNs and their function within the cluster.
@@ -59,7 +61,7 @@ All images defined in `docker-compose.yml` will be built from the `mjstealey/slu
 
 ## Usage
 
-An example [docker-compose.yml](docker-compose.yml) is provided that builds and deploys the diagramed topology (`-d` is used to daemonize the call).
+An example [docker-compose.yml](docker-compose.yml) file is provided that builds and deploys the diagramed topology (`-d` is used to daemonize the call).
 
 ```
 docker-compose up -d
