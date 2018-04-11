@@ -28,7 +28,7 @@ Build the docker image
 
 ```
 $ cd centos-7/
-$ docker build -t slurm.rpm:latest .
+$ docker build -t mjstealey/slurm.rpms:17.11.5 .
 ```
 
 ### Run the image 
@@ -43,7 +43,7 @@ $ docker build -t slurm.rpm:latest .
 $ docker run --rm \
 	-e SLURM_VERSION=17.11.5 \
 	-v $(pwd)/rpms:/packages \
-	slurm.rpm:latest
+	mjstealey/slurm.rpms:17.11.5
 ```
 
 **Verify RPMs**:
