@@ -138,7 +138,7 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 MariaDB [(none)]>
 ```
 
-Use the `` database
+Checkout the `slurm_acct_db` database and it's tables
 
 ```console
 MariaDB [(none)]> use slurm_acct_db;
@@ -207,7 +207,7 @@ $ docker exec -ti -u worker worker01 /bin/bash
 /home/worker
 ```
 
-Test password-less ssh between containers
+Test password-less `ssh` between containers
 
 ```console
 [worker@worker01 ~]$ hostname
@@ -220,7 +220,7 @@ worker02.local.dev
 controller.local.dev
 ```
 
-As the `worker` user from the `controller` node, test the `sacct` and `srun` calls.
+As the user `worker` from the `controller` node, test the `sacct` and `srun` calls.
 
 ```console
 [worker@controller ~]$ hostname
@@ -237,7 +237,7 @@ worker01.local.dev
 2              hostname     docker     worker          2  COMPLETED      0:0
 ```
 
-As the `worker` user from the `controller` node, test the `sbatch` call.
+As the user `worker` from the `controller` node, test the `sbatch` call.
 
 From the `/home/worker` directory, make a small `slurm_test.job` file
 
@@ -250,9 +250,9 @@ From the `/home/worker` directory, make a small `slurm_test.job` file
 
 # Run your executable
 
-echo "Hello from $hostname!"
+echo "Hello from $(hostname)!"
 sleep 20s
-echo "Goodbye from $hostname..."
+echo "Goodbye from $(hostname)..."
 ```
 
 Run the job using `sbatch` and verify the state of the job using `squeue`
