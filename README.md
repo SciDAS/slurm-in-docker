@@ -222,83 +222,214 @@ worker02.local.dev
 controller.local.dev
 ```
 
-As the user `worker` from the `controller` node, test the `sacct` and `srun` calls.
+### Slurm commands
+
+All commands are issued as the user `worker` from the `controller` node
 
 ```console
-[worker@controller ~]$ hostname
-controller.local.dev
-[worker@controller ~]$ sacct
+$ docker exec -ti -u worker controller /bin/bash
+[worker@controller /]$ cd ~
+[worker@controller ~]$ pwd
+/home/worker
+```
+
+- For the rest of this section the `[worker@controller ~]$` prompt will be shortend to simply `$`
+
+Test the `sacct` and `srun` calls
+
+```console
+$ sacct
        JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
 ------------ ---------- ---------- ---------- ---------- ---------- --------
-[worker@controller ~]$ srun -N 2 hostname
-worker02.local.dev
+$ srun -N 2 hostname
 worker01.local.dev
-[worker@controller ~]$ sacct
+worker02.local.dev
+$ sacct
        JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
 ------------ ---------- ---------- ---------- ---------- ---------- --------
 2              hostname     docker     worker          2  COMPLETED      0:0
 ```
 
-As the user `worker` from the `controller` node, test the `sbatch` call.
+Test the `sbatch` call
 
-From the `/home/worker` directory, make a small `slurm_test.job` file
+Make a job file named: `slurm_test.job`
 
 ```bash
 #!/bin/bash
 
 #SBATCH --job-name=SLURM_TEST
-#SBATCH --output=output.SLURM_TEST
-#SBATCH --error=output_err.SLURM_TEST
+#SBATCH --output=SLURM_TEST.out
+#SBATCH --error=SLURM_TEST.err
+#SBATCH --partition=docker
 
-# Run your executable
-
-echo "Hello from $(hostname)!"
-sleep 20s
-echo "Goodbye from $(hostname)..."
+srun hostname | sort
 ```
 
-Run the job using `sbatch` and verify the state of the job using `squeue`
+Run the job using `sbatch`
 
 ```console
-[worker@controller ~]$ sbatch slurm_test.job
+$ sbatch -N 2 slurm_test.job
 Submitted batch job 3
-[worker@controller ~]$ squeue
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-                 3    docker SLURM_TE   worker  R       0:03      1 worker01
-[worker@controller ~]$ squeue
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-                 3    docker SLURM_TE   worker  R       0:11      1 worker01
-[worker@controller ~]$ squeue
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-                 3    docker SLURM_TE   worker  R       0:20      1 worker01
-[worker@controller ~]$ squeue
-             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
-[worker@controller ~]$
 ```
 
 Check the `sacct` output
 
 ```console
-[worker@controller ~]$ sacct
+$ sacct
        JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
 ------------ ---------- ---------- ---------- ---------- ---------- --------
 2              hostname     docker     worker          2  COMPLETED      0:0
-3            SLURM_TEST     docker     worker          1  COMPLETED      0:0
+3            SLURM_TEST     docker     worker          2  COMPLETED      0:0
 3.batch           batch                worker          1  COMPLETED      0:0
+3.0            hostname                worker          2  COMPLETED      0:0
 ```
 
 Check the output files
 
 ```console
-[worker@controller ~]$ ls -1
-output.SLURM_TEST
-output_err.SLURM_TEST
+$ ls -1
+SLURM_TEST.err
+SLURM_TEST.out
 slurm_test.job
-...
-[worker@controller ~]$ cat output.SLURM_TEST
-Hello from worker01.local.dev!
-Goodbye from worker01.local.dev...
+$ cat SLURM_TEST.out
+worker01.local.dev
+worker02.local.dev
 ```
+
+Test the `sbatch --array` and `squeue` calls
+
+Make a job file named `array_test.job`:
+
+```bash
+#!/bin/bash
+
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH -t 24:00:00
+###################
+## %A == SLURM_ARRAY_JOB_ID
+## %a == SLURM_ARRAY_TASK_ID (or index)
+## %N == SLURMD_NODENAME (directories made ahead of time)
+#SBATCH -o %N/%A_%a_out.txt
+#SBATCH -e %N/%A_%a_err.txt
+
+snooze=$(( ( RANDOM % 10 )  + 1 ))
+echo "$(hostname) is snoozing for ${snooze} seconds..."
+
+sleep $snooze
+```
+
+This job defines output directories as being `%N` which reflect the `SLURMD_NODENAME` variable. The output directories will need to exist ahead of time in this particular case, and can be determined by finding all available nodes in the `NODELIST` and creating the directories.
+
+```console
+$ sinfo -N
+NODELIST   NODES PARTITION STATE
+worker01       1   docker* idle
+worker02       1   docker* idle
+$ mkdir worker01 worker02
+```
+
+The job when run will direct it's output files to the directory defined by the node on which it is running. Each iteration will sleep from 1 to 10 seconds randomly before moving onto the next run in the array.
+
+We will run an array of 20 jobs, 2 at a time, until the array is completed. The status can be found using the `squeue` command.
+
+```console
+$ sbatch --array=1-20%2 array_test.job
+Submitted batch job 4
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+        4_[3-20%2]    docker array_te   worker PD       0:00      1 (JobArrayTaskLimit)
+               4_1    docker array_te   worker  R       0:01      1 worker01
+               4_2    docker array_te   worker  R       0:01      1 worker02
+...
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+          4_[20%2]    docker array_te   worker PD       0:00      1 (JobArrayTaskLimit)
+              4_19    docker array_te   worker  R       0:04      1 worker02
+              4_18    docker array_te   worker  R       0:10      1 worker01
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+```
+
+Looking into each of the `worker01` and `worker02` directories we can see which jobs were run on each node.
+
+```console
+$ ls
+SLURM_TEST.err  array_test.job  worker01
+SLURM_TEST.out  slurm_test.job  worker02
+$ ls worker01
+4_11_err.txt  4_16_err.txt  4_1_err.txt   4_3_err.txt  4_7_err.txt
+4_11_out.txt  4_16_out.txt  4_1_out.txt   4_3_out.txt  4_7_out.txt
+4_14_err.txt  4_18_err.txt  4_20_err.txt  4_5_err.txt  4_9_err.txt
+4_14_out.txt  4_18_out.txt  4_20_out.txt  4_5_out.txt  4_9_out.txt
+$ ls worker02
+4_10_err.txt  4_13_err.txt  4_17_err.txt  4_2_err.txt  4_6_err.txt
+4_10_out.txt  4_13_out.txt  4_17_out.txt  4_2_out.txt  4_6_out.txt
+4_12_err.txt  4_15_err.txt  4_19_err.txt  4_4_err.txt  4_8_err.txt
+4_12_out.txt  4_15_out.txt  4_19_out.txt  4_4_out.txt  4_8_out.txt
+```
+
+And looking at each `*_out.txt` file view the output
+
+```console
+$ cat worker01/4_14_out.txt
+worker01.local.dev is snoozing for 10 seconds...
+$ cat worker02/4_6_out.txt
+worker02.local.dev is snoozing for 7 seconds...
+```
+
+Using the `sacct` call we can see when each job in the array was executed
+
+```console
+$ sacct
+       JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+------------ ---------- ---------- ---------- ---------- ---------- --------
+2              hostname     docker     worker          2  COMPLETED      0:0
+3            SLURM_TEST     docker     worker          2  COMPLETED      0:0
+3.batch           batch                worker          1  COMPLETED      0:0
+3.0            hostname                worker          2  COMPLETED      0:0
+4_20         array_tes+     docker     worker          1  COMPLETED      0:0
+4_20.batch        batch                worker          1  COMPLETED      0:0
+4_1          array_tes+     docker     worker          1  COMPLETED      0:0
+4_1.batch         batch                worker          1  COMPLETED      0:0
+4_2          array_tes+     docker     worker          1  COMPLETED      0:0
+4_2.batch         batch                worker          1  COMPLETED      0:0
+4_3          array_tes+     docker     worker          1  COMPLETED      0:0
+4_3.batch         batch                worker          1  COMPLETED      0:0
+4_4          array_tes+     docker     worker          1  COMPLETED      0:0
+4_4.batch         batch                worker          1  COMPLETED      0:0
+4_5          array_tes+     docker     worker          1  COMPLETED      0:0
+4_5.batch         batch                worker          1  COMPLETED      0:0
+4_6          array_tes+     docker     worker          1  COMPLETED      0:0
+4_6.batch         batch                worker          1  COMPLETED      0:0
+4_7          array_tes+     docker     worker          1  COMPLETED      0:0
+4_7.batch         batch                worker          1  COMPLETED      0:0
+4_8          array_tes+     docker     worker          1  COMPLETED      0:0
+4_8.batch         batch                worker          1  COMPLETED      0:0
+4_9          array_tes+     docker     worker          1  COMPLETED      0:0
+4_9.batch         batch                worker          1  COMPLETED      0:0
+4_10         array_tes+     docker     worker          1  COMPLETED      0:0
+4_10.batch        batch                worker          1  COMPLETED      0:0
+4_11         array_tes+     docker     worker          1  COMPLETED      0:0
+4_11.batch        batch                worker          1  COMPLETED      0:0
+4_12         array_tes+     docker     worker          1  COMPLETED      0:0
+4_12.batch        batch                worker          1  COMPLETED      0:0
+4_13         array_tes+     docker     worker          1  COMPLETED      0:0
+4_13.batch        batch                worker          1  COMPLETED      0:0
+4_14         array_tes+     docker     worker          1  COMPLETED      0:0
+4_14.batch        batch                worker          1  COMPLETED      0:0
+4_15         array_tes+     docker     worker          1  COMPLETED      0:0
+4_15.batch        batch                worker          1  COMPLETED      0:0
+4_16         array_tes+     docker     worker          1  COMPLETED      0:0
+4_16.batch        batch                worker          1  COMPLETED      0:0
+4_17         array_tes+     docker     worker          1  COMPLETED      0:0
+4_17.batch        batch                worker          1  COMPLETED      0:0
+4_18         array_tes+     docker     worker          1  COMPLETED      0:0
+4_18.batch        batch                worker          1  COMPLETED      0:0
+4_19         array_tes+     docker     worker          1  COMPLETED      0:0
+4_19.batch        batch                worker          1  COMPLETED      0:0
+```
+
 ## Tear down
 
 The containers can be stopped and removed using `docker-compose`
