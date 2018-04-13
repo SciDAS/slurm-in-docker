@@ -586,7 +586,7 @@ Test `mpi_hello.out` using the MPI versions avalaible on the system with `srun`
     ```
 - two nodes using **pmi2**
 
-    ```
+    ```console
     $ srun -N 2 --mpi=pmi2 mpi_hello.out
     Hello from task 0 on worker01.local.dev!
     MASTER: Number of MPI tasks is: 2
@@ -622,6 +622,8 @@ sleep $snooze
 
 srun -N 2 --mpi=openmpi mpi_hello.out
 ```
+
+Make directory `mpi_out`
 
 ```console
 $ mkdir mpi_out
