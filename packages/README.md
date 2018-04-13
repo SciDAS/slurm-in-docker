@@ -4,7 +4,7 @@ Builds the [Slurm](https://www.schedmd.com/index.php) packages from their [lates
 
 Supported builds (defaults shown):
 
-- CentOS 7 
+- CentOS 7 - Slurm
 	- `slurm-17.11.5-1.el7.centos.x86_64.rpm`
 	- `slurm-contribs-17.11.5-1.el7.centos.x86_64.rpm`
 	- `slurm-devel-17.11.5-1.el7.centos.x86_64.rpm`
@@ -16,7 +16,10 @@ Supported builds (defaults shown):
 	- `slurm-slurmctld-17.11.5-1.el7.centos.x86_64.rpm`
 	- `slurm-slurmd-17.11.5-1.el7.centos.x86_64.rpm`
 	- `slurm-slurmdbd-17.11.5-1.el7.centos.x86_64.rpm`
-	- `slurm-torque-17.11.5-1.el7.centos.x86_64.rpm`
+	- `slurm-torque-17.11.5-1.el7.centos.x86_64.rpm` (conflicts with openmpi installation)
+- CentOS 7 - OpenMPI 3.0.1
+    - `openmpi-3.0.1-1.el7.centos.x86_64.rpm` 
+      - **Note**: Installation of this rpm conflicts with `/usr/bin/mpiexec` from `slurm-torque` and as such the `slurm-torque` rpm is not installed in the **slurm-base** docker image.
 
 ## CentOS 7
 
@@ -50,16 +53,16 @@ $ docker run --rm \
 
 ```console
 $ ls -alh $(pwd)/rpms
--rw-r--r--   1 xxxxx  xxxxx    13M Apr  6 10:10 slurm-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx    16K Apr  6 10:10 slurm-contribs-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx    77K Apr  6 10:10 slurm-devel-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   5.7K Apr  6 10:10 slurm-example-configs-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   136K Apr  6 10:10 slurm-libpmi-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   8.3K Apr  6 10:10 slurm-openlava-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   139K Apr  6 10:10 slurm-pam_slurm-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   798K Apr  6 10:10 slurm-perlapi-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   1.1M Apr  6 10:10 slurm-slurmctld-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   616K Apr  6 10:10 slurm-slurmd-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   637K Apr  6 10:10 slurm-slurmdbd-17.11.5-1.el7.centos.x86_64.rpm
--rw-r--r--   1 xxxxx  xxxxx   113K Apr  6 10:10 slurm-torque-17.11.5-1.el7.centos.x86_64.rpm
-```
+-rw-r--r--   1 xxxxx  xxxxx    11M Apr 12 22:39 openmpi-3.0.1-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx    13M Apr 12 22:31 slurm-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx    16K Apr 12 22:31 slurm-contribs-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx    77K Apr 12 22:31 slurm-devel-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   5.7K Apr 12 22:31 slurm-example-configs-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   136K Apr 12 22:31 slurm-libpmi-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   8.3K Apr 12 22:31 slurm-openlava-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   139K Apr 12 22:31 slurm-pam_slurm-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   798K Apr 12 22:31 slurm-perlapi-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   1.1M Apr 12 22:31 slurm-slurmctld-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   616K Apr 12 22:31 slurm-slurmd-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   637K Apr 12 22:31 slurm-slurmdbd-17.11.5-1.el7.centos.x86_64.rpm
+-rw-r--r--   1 xxxxx  xxxxx   113K Apr 12 22:31 slurm-torque-17.11.5-1.el7.centos.x86_64.rpm```

@@ -6,10 +6,15 @@ Use [Docker](https://www.docker.com/) to explore the various components of [Slur
 
 This work represents a small exploratory Slurm cluster using CentOS 7 based Docker images. The intent was to learn the basics of Slurm prior to extending the concept to a more distributed environment.
 
+Includes build scripts for:
+
+- [Slurm 17.11.5](https://slurm.schedmd.com) rpms (though other versions can be built)
+- [OpenMPI 3.0.1](https://www.open-mpi.org/doc/current/) rpm
+
 ## Contents
 
-1. [packages](packages) - Build the RPM packages for running Slurm on CentOS 7
-2. [base](base) - Slurm base image from which other components are based
+1. [packages](packages) - Build the RPM packages for running Slurm and OpenMPI on CentOS 7
+2. [base](base) - Slurm base image from which other components are derived
 3. [controller](controller) - Slurm controller (head-node) definition
 4. [database](database) - Slurm database definition (not necessary, but useful for accounting information)
 5. [worker](worker) - Slurm worker (compute-node) definition
@@ -78,7 +83,16 @@ a8382a486989        mjstealey/slurm.worker:17.11.5       "/usr/local/bin/tini…
 24e951854109        mjstealey/slurm.controller:17.11.5   "/usr/local/bin/tini…"   11 seconds ago      Up 31 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   controller
 ```
 
-## Example Slurm interaction
+## Examples using Slurm
+
+The examples make use of the following commands.
+
+- `sinfo` - [man page](https://slurm.schedmd.com/sinfo.html)
+- `sacctmgr` - [man page](https://slurm.schedmd.com/sacctmgr.html)
+- `sacct` - [man page](https://slurm.schedmd.com/sacct.html)
+- `srun` - [man page](https://slurm.schedmd.com/srun.html)
+- `sbatch` - [man page](https://slurm.schedmd.com/sbatch.html)
+- `squeue` - [man page](https://slurm.schedmd.com/squeue.html)
 
 ### controller
 
@@ -429,6 +443,269 @@ $ sacct
 4_19         array_tes+     docker     worker          1  COMPLETED      0:0
 4_19.batch        batch                worker          1  COMPLETED      0:0
 ```
+## Examples using MPI
+
+The examples make use of the following commands.
+
+- `ompi_info` - [man page](https://www.open-mpi.org/doc/v3.0/man1/
+- `mpicc` - [man page](https://www.open-mpi.org/doc/v3.0/man1/mpicc.1.php)ompi_info.1.php)
+- `srun` - [man page](https://slurm.schedmd.com/srun.html)
+- `sbatch` - [man page](https://slurm.schedmd.com/sbatch.html)
+- `squeue` - [man page](https://slurm.schedmd.com/squeue.html)
+- `sacct` - [man page](https://slurm.schedmd.com/sacct.html)
+
+### controller
+
+All commands are issued as the user `worker` from the `controller` node
+
+```console
+$ docker exec -ti -u worker controller /bin/bash
+[worker@controller /]$ cd ~
+[worker@controller ~]$ pwd
+/home/worker
+```
+
+Available implementions of MPI
+
+```console
+$ srun --mpi=list
+srun: MPI types are...
+srun: none
+srun: pmi2
+srun: openmpi
+```
+
+About Open MPI
+
+```console
+$ ompi_info
+                 Package: Open MPI root@a6fd2549e449 Distribution
+                Open MPI: 3.0.1
+  Open MPI repo revision: v3.0.1
+   Open MPI release date: Mar 29, 2018
+                Open RTE: 3.0.1
+  Open RTE repo revision: v3.0.1
+   Open RTE release date: Mar 29, 2018
+                    OPAL: 3.0.1
+      OPAL repo revision: v3.0.1
+       OPAL release date: Mar 29, 2018
+                 MPI API: 3.1.0
+            Ident string: 3.0.1
+                  Prefix: /usr
+ Configured architecture: x86_64-redhat-linux-gnu
+          Configure host: a6fd2549e449
+           Configured by: root
+           Configured on: Fri Apr 13 02:32:11 UTC 2018
+          Configure host: a6fd2549e449
+  Configure command line: '--build=x86_64-redhat-linux-gnu'
+                          '--host=x86_64-redhat-linux-gnu'
+                          '--program-prefix=' '--disable-dependency-tracking'
+                          '--prefix=/usr' '--exec-prefix=/usr'
+                          '--bindir=/usr/bin' '--sbindir=/usr/sbin'
+                          '--sysconfdir=/etc' '--datadir=/usr/share'
+                          '--includedir=/usr/include' '--libdir=/usr/lib64'
+                          '--libexecdir=/usr/libexec' '--localstatedir=/var'
+                          '--sharedstatedir=/var/lib'
+                          '--mandir=/usr/share/man'
+                          '--infodir=/usr/share/info' '--with-slurm'
+                          '--with-pmi' '--with-libfabric='
+                          'LDFLAGS=-Wl,--build-id -Wl,-rpath -Wl,/lib64
+                          -Wl,--enable-new-dtags'
+...
+```
+
+Simple test `mpi_hello.out`
+
+Create a new file called `mpi_hello.c` in `/home/worker` and compile it:
+
+```c
+/******************************************************************************
+ * * FILE: mpi_hello.c
+ * * DESCRIPTION:
+ * *   MPI tutorial example code: Simple hello world program
+ * * AUTHOR: Blaise Barney
+ * * LAST REVISED: 03/05/10
+ * ******************************************************************************/
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define  MASTER 0
+
+int main (int argc, char *argv[]) {
+   int   numtasks, taskid, len;
+   char hostname[MPI_MAX_PROCESSOR_NAME];
+
+   MPI_Init(&argc, &argv);
+   MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+   MPI_Comm_rank(MPI_COMM_WORLD,&taskid);
+   MPI_Get_processor_name(hostname, &len);
+
+   printf ("Hello from task %d on %s!\n", taskid, hostname);
+
+   if (taskid == MASTER)
+      printf("MASTER: Number of MPI tasks is: %d\n",numtasks);
+
+   //while(1) {}
+
+   MPI_Finalize();
+}
+```
+
+```console
+$ mpicc mpi_hello.c -o mpi_hello.out
+$ ls | grep mpi
+mpi_hello.c
+mpi_hello.out
+```
+
+Test `mpi_hello.out` using the MPI versions avalaible on the system with `srun`
+
+- single node using **openmpi**
+
+    ```console
+    $ srun --mpi=openmpi mpi_hello.out
+    Hello from task 0 on worker01.local.dev!
+    MASTER: Number of MPI tasks is: 1
+    $ sacct
+           JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+    ------------ ---------- ---------- ---------- ---------- ---------- --------
+    2            mpi_hello+     docker     worker          1  COMPLETED      0:0
+    ```
+- two nodes using **openmpi**
+
+    ```console
+    $ srun -N 2 --mpi=openmpi mpi_hello.out
+    Hello from task 0 on worker01.local.dev!
+    MASTER: Number of MPI tasks is: 2
+    Hello from task 1 on worker02.local.dev!
+    $ sacct
+           JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+    ------------ ---------- ---------- ---------- ---------- ---------- --------
+    2            mpi_hello+     docker     worker          1  COMPLETED      0:0
+    3            mpi_hello+     docker     worker          2  COMPLETED      0:0
+    ```
+- two nodes using **pmi2**
+
+    ```
+    $ srun -N 2 --mpi=pmi2 mpi_hello.out
+    Hello from task 0 on worker01.local.dev!
+    MASTER: Number of MPI tasks is: 2
+    Hello from task 1 on worker02.local.dev!
+    $ sacct
+           JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+    ------------ ---------- ---------- ---------- ---------- ---------- --------
+    2            mpi_hello+     docker     worker          1  COMPLETED      0:0
+    3            mpi_hello+     docker     worker          2  COMPLETED      0:0
+    4            mpi_hello+     docker     worker          2  COMPLETED      0:0
+    ```
+
+Run a batch array with a sleep to observe the queue
+
+Create a file named `mpi_batch.job` in `/home/worker` (similar to the script used for the `sbatch --array` example from above, and make an output directory named `mpi_out`)
+
+file `mpi_batch.job`:
+
+```bash
+#!/bin/bash
+
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH -t 24:00:00
+###################
+## %A == SLURM_ARRAY_JOB_ID
+## %a == SLURM_ARRAY_TASK_ID (or index)
+#SBATCH -o mpi_out/%A_%a_out.txt
+#SBATCH -e mpi_out/%A_%a_err.txt
+
+snooze=$(( ( RANDOM % 10 )  + 1 ))
+sleep $snooze
+
+srun -N 2 --mpi=openmpi mpi_hello.out
+```
+
+```console
+$ mkdir mpi_out
+```
+
+Run an `sbatch` array of 5 jobs, one at a time, using both nodes.
+
+```console
+$ sbatch -N 2 --array=1-5%1 mpi_batch.job
+Submitted batch job 10
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+        10_[2-5%1]    docker mpi_batc   worker PD       0:00      2 (JobArrayTaskLimit)
+              10_1    docker mpi_batc   worker  R       0:03      2 worker[01-02]
+$ sacct
+       JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+------------ ---------- ---------- ---------- ---------- ---------- --------
+...
+10_[2-5%1]   mpi_batch+     docker     worker          2    PENDING      0:0
+10_1         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_1.batch        batch                worker          1  COMPLETED      0:0
+10_1.0       mpi_hello+                worker          2  COMPLETED      0:0
+```
+...
+
+```console
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+        10_[4-5%1]    docker mpi_batc   worker PD       0:00      2 (JobArrayTaskLimit)
+              10_3    docker mpi_batc   worker  R       0:05      2 worker[01-02]
+$ sacct
+       JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+------------ ---------- ---------- ---------- ---------- ---------- --------
+...
+10_[4-5%1]   mpi_batch+     docker     worker          2    PENDING      0:0
+10_1         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_1.batch        batch                worker          1  COMPLETED      0:0
+10_1.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_2         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_2.batch        batch                worker          1  COMPLETED      0:0
+10_2.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_3         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_3.batch        batch                worker          1  COMPLETED      0:0
+10_3.0       mpi_hello+                worker          2  COMPLETED      0:0
+```
+...
+
+```console
+$ squeue
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+$ sacct
+       JobID    JobName  Partition    Account  AllocCPUS      State ExitCode
+------------ ---------- ---------- ---------- ---------- ---------- --------
+...
+10_5         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_5.batch        batch                worker          1  COMPLETED      0:0
+10_5.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_1         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_1.batch        batch                worker          1  COMPLETED      0:0
+10_1.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_2         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_2.batch        batch                worker          1  COMPLETED      0:0
+10_2.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_3         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_3.batch        batch                worker          1  COMPLETED      0:0
+10_3.0       mpi_hello+                worker          2  COMPLETED      0:0
+10_4         mpi_batch+     docker     worker          2  COMPLETED      0:0
+10_4.batch        batch                worker          1  COMPLETED      0:0
+10_4.0       mpi_hello+                worker          2  COMPLETED      0:0
+```
+
+Check the `mpi_out` output directory
+
+```console
+$ ls mpi_out/
+10_1_err.txt  10_2_err.txt  10_3_err.txt  10_4_err.txt  10_5_err.txt
+10_1_out.txt  10_2_out.txt  10_3_out.txt  10_4_out.txt  10_5_out.txt
+$ cat mpi_out/10_3_out.txt
+Hello from task 1 on worker02.local.dev!
+Hello from task 0 on worker01.local.dev!
+MASTER: Number of MPI tasks is: 2
+```
+
+
 
 ## Tear down
 
