@@ -447,8 +447,8 @@ $ sacct
 
 The examples make use of the following commands.
 
-- `ompi_info` - [man page](https://www.open-mpi.org/doc/v3.0/man1/
-- `mpicc` - [man page](https://www.open-mpi.org/doc/v3.0/man1/mpicc.1.php)ompi_info.1.php)
+- `ompi_info` - [man page](https://www.open-mpi.org/doc/v3.0/man1/ompi_info.1.php)
+- `mpicc` - [man page](https://www.open-mpi.org/doc/v3.0/man1/mpicc.1.php)
 - `srun` - [man page](https://slurm.schedmd.com/srun.html)
 - `sbatch` - [man page](https://slurm.schedmd.com/sbatch.html)
 - `squeue` - [man page](https://slurm.schedmd.com/squeue.html)
@@ -514,7 +514,7 @@ $ ompi_info
 ...
 ```
 
-Simple test `mpi_hello.out`
+Hello world using `mpi_hello.out`
 
 Create a new file called `mpi_hello.c` in `/home/worker` and compile it:
 
