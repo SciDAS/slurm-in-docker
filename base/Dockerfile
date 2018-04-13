@@ -26,20 +26,18 @@ RUN yum -y install \
   openssh-clients \
   inotify-tools
 
+# install slurm 17.11.5
 COPY rpms /packages
-RUN yum -y localinstall \
-  /packages/slurm-*.rpm
-
-RUN rm -f /packages/slurm-*.rpm \
-  && yum clean all \
-  && rm -rf /var/cache/yum
+# /usr/bin/mpiexec from slurm-torque conflicts with openmpi install
+WORKDIR /packages
+RUN yum -y localinstall $(ls | grep -v -e 'torque' -e 'openmpi')
+WORKDIR /
 
 VOLUME ["/.secret", "/storage", "/home"]
 
-# 22:           SSH
+#   22:         SSH
 # 3306:         MariaDB
 # 6817:         Slurm Ctl D
 # 6818:         Slurm D
 # 6819:         Slurm DBD
-# 60001-63000:  srun
-EXPOSE 22 3306 6817 6818 6819 60001-63000
+EXPOSE 22 3306 6817 6818 6819

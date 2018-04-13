@@ -7,6 +7,7 @@ RUN yum -y install \
   deltarpm \
   epel-release \
   && yum -y install \
+  which \
   wget \
   munge \
   munge-libs \
@@ -33,7 +34,8 @@ RUN yum -y install \
   perl-Switch \
   perl-ExtUtils-MakeMaker \
   mariadb-server \
-  mariadb-devel
+  mariadb-devel \
+  && yum -y group install "Development Tools"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 VOLUME ["/packages"]
