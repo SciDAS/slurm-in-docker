@@ -33,7 +33,7 @@ WORKDIR /packages
 RUN yum -y localinstall $(ls | grep -v -e 'torque' -e 'openmpi')
 WORKDIR /
 
-VOLUME ["/.secret", "/storage", "/home"]
+VOLUME ["/home", "/.secret"]
 
 #   22:         SSH
 # 3306:         MariaDB

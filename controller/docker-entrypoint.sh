@@ -3,14 +3,16 @@ set -e
 
 # start sshd server
 _sshd_host() {
-  mkdir /var/run/sshd
-  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  if [ ! -d /var/run/sshd ]; then
+    mkdir /var/run/sshd
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  fi
   /usr/sbin/sshd
 }
 
 # setup worker ssh to be passwordless
 _ssh_worker() {
-  cat > /home/worker/setup-ssh.sh <<'EOF2'
+  cat > /home/worker/setup-worker-ssh.sh <<'EOF2'
 mkdir -p ~/.ssh
 chmod 0700 ~/.ssh
 ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N "" -C "$(whoami)@$(hostname)-$(date -I)"
@@ -27,9 +29,9 @@ cd ~/
 tar -czvf ~/worker-secret.tar.gz .ssh
 cd -
 EOF2
-  chmod +x /home/worker/setup-ssh.sh
-  chown worker: /home/worker/setup-ssh.sh
-  sudo -u worker /home/worker/setup-ssh.sh
+  chmod +x /home/worker/setup-worker-ssh.sh
+  chown worker: /home/worker/setup-worker-ssh.sh
+  sudo -u worker /home/worker/setup-worker-ssh.sh
 }
 
 # start munge and generate key
@@ -46,10 +48,13 @@ _munge_start() {
   remunge
 }
 
-# copy secrets to .secret directory for other nodes
+# copy secrets to /.secret directory for other nodes
 _copy_secrets() {
   cp /home/worker/worker-secret.tar.gz /.secret/worker-secret.tar.gz
+  cp /home/worker/setup-worker-ssh.sh /.secret/setup-worker-ssh.sh
   cp /etc/munge/munge.key /.secret/munge.key
+  rm -f /home/worker/worker-secret.tar.gz
+  rm -f /home/worker/setup-worker-ssh.sh
 }
 
 # generate slurm.conf

@@ -5,8 +5,10 @@ SLURM_ACCT_DB_SQL=/slurm_acct_db.sql
 
 # start sshd server
 _sshd_host() {
-  mkdir /var/run/sshd
-  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  if [ ! -d /var/run/sshd ]; then
+    mkdir /var/run/sshd
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  fi
   /usr/sbin/sshd
 }
 
@@ -18,10 +20,6 @@ _slurm_acct_db() {
   echo "grant usage on *.* to '${STORAGE_USER}'@'${STORAGE_HOST}';" >> $SLURM_ACCT_DB_SQL
   echo "grant all privileges on slurm_acct_db.* to '${STORAGE_USER}'@'${STORAGE_HOST}';" >> $SLURM_ACCT_DB_SQL
   echo "flush privileges;" >> $SLURM_ACCT_DB_SQL
-
-  # echo "CREATE USER '${STORAGE_USER}'@'${HOSTNAME}' IDENTIFIED BY '${STORAGE_PASS}';" > $SLURM_ACCT_DB_SQL
-  # echo "GRANT ALL ON slurm_acct_db.* TO '${STORAGE_USER}'@'${HOSTNAME}';" >> $SLURM_ACCT_DB_SQL
-  # echo "FLUSH PRIVILEGES;" >> $SLURM_ACCT_DB_SQL
 }
 
 # start database
@@ -57,6 +55,7 @@ _munge_start_using_key() {
   remunge
 }
 
+### NO LONGER USED ###
 # setup worker ssh to be passwordless
 _ssh_copy_worker() {
   if [ ! -f /.secret/worker-secret.tar.gz ]; then
@@ -69,6 +68,17 @@ _ssh_copy_worker() {
   cp /.secret/worker-secret.tar.gz /home/worker
   chown worker: /home/worker/worker-secret.tar.gz
   sudo -u worker /bin/bash -c 'cd ~/; tar -xzvf worker-secret.tar.gz'
+}
+
+# wait for worker user in shared /home volume
+_wait_for_worker() {
+  if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
+    while read i; do
+      if [ "$i" = id_rsa.pub ]; then
+        break;
+      fi;
+    done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
+  fi
 }
 
 # generate slurmdbd.conf
@@ -131,7 +141,8 @@ _slurmdbd() {
 _sshd_host
 _mariadb_start
 _munge_start_using_key
-_ssh_copy_worker
+# _ssh_copy_worker
+_wait_for_worker
 _slurmdbd
 
 tail -f /dev/null

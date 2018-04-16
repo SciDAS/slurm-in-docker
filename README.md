@@ -6,10 +6,11 @@ Use [Docker](https://www.docker.com/) to explore the various components of [Slur
 
 This work represents a small exploratory Slurm cluster using CentOS 7 based Docker images. The intent was to learn the basics of Slurm prior to extending the concept to a more distributed environment.
 
-Includes build scripts for:
+Images include:
 
-- [Slurm 17.11.5](https://slurm.schedmd.com) rpms (though other versions can be built)
-- [OpenMPI 3.0.1](https://www.open-mpi.org/doc/current/) rpm
+- [Slurm 17.11.5](https://slurm.schedmd.com) - installed from [rpm packages](packages)
+- [OpenMPI 3.0.1](https://www.open-mpi.org/doc/current/) - installed from [rpm packages](packages)
+- [Lmod 7.7](http://lmod.readthedocs.io/en/latest/index.html) - installed from [distribution files](https://sourceforge.net/projects/lmod/files/)
 
 ## Contents
 
@@ -764,3 +765,11 @@ Slurm workload manager: [https://www.schedmd.com/index.php](https://www.schedmd.
 Docker: [https://www.docker.com](https://www.docker.com)
 
 - Docker is the company driving the container movement and the only container platform provider to address every application across the hybrid cloud. Today’s businesses are under pressure to digitally transform but are constrained by existing applications and infrastructure while rationalizing an increasingly diverse portfolio of clouds, datacenters and application architectures. Docker enables true independence between applications and infrastructure and developers and IT ops to unlock their potential and creates a model for better collaboration and innovation.
+
+OpenMPI: [https://www.open-mpi.org](https://www.open-mpi.org)
+
+- The Open MPI Project is an open source [Message Passing Interface](http://www.mpi-forum.org/) implementation that is developed and maintained by a consortium of academic, research, and industry partners. Open MPI is therefore able to combine the expertise, technologies, and resources from all across the High Performance Computing community in order to build the best MPI library available. Open MPI offers advantages for system and software vendors, application developers and computer science researchers.
+
+Lmod: [http://lmod.readthedocs.io/en/latest/index.html](http://lmod.readthedocs.io/en/latest/index.html)
+
+- Lmod is a Lua based module system that easily handles the MODULEPATH Hierarchical problem. Environment Modules provide a convenient way to dynamically change the users’ environment through modulefiles. This includes easily adding or removing directories to the PATH environment variable. Modulefiles for Library packages provide environment variables that specify where the library and header files can be found.
