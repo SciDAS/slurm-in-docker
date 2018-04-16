@@ -7,10 +7,10 @@ services:
       dockerfile: Dockerfile
     image: mjstealey/slurm.controller:17.11.5
     container_name: controller
+    privileged: true
     volumes:
-      - secret:/.secret
-      - storage:/storage
       - home:/home
+      - secret:/.secret
     restart: always
     hostname: controller.local.dev
     networks:
@@ -34,7 +34,9 @@ services:
     depends_on:
       - controller
     container_name: database
+    privileged: true
     volumes:
+      - home:/home
       - secret:/.secret
     restart: always
     hostname: database.local.dev
@@ -57,10 +59,10 @@ services:
     depends_on:
       - controller
     container_name: worker01
+    privileged: true
     volumes:
-      - secret:/.secret
-      - storage:/storage
       - home:/home
+      - secret:/.secret
     restart: always
     hostname: worker01.local.dev
     networks:
@@ -78,10 +80,10 @@ services:
     depends_on:
       - controller
     container_name: worker02
+    privileged: true
     volumes:
-      - secret:/.secret
-      - storage:/storage
       - home:/home
+      - secret:/.secret
     restart: always
     hostname: worker02.local.dev
     networks:
@@ -92,9 +94,8 @@ services:
       COMPUTE_NODES: worker01 worker02
 
 volumes:
-  secret:
-  storage:
   home:
+  secret:
 
 networks:
   slurm:

@@ -3,8 +3,10 @@ set -e
 
 # start sshd server
 _sshd_host() {
-  mkdir /var/run/sshd
-  ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  if [ ! -d /var/run/sshd ]; then
+    mkdir /var/run/sshd
+    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+  fi
   /usr/sbin/sshd
 }
 
@@ -29,6 +31,7 @@ _munge_start_using_key() {
   remunge
 }
 
+### NO LONGER USED ###
 # setup worker ssh to be passwordless
 _ssh_copy_worker() {
   if [ ! -f /.secret/worker-secret.tar.gz ]; then
@@ -41,6 +44,17 @@ _ssh_copy_worker() {
   cp /.secret/worker-secret.tar.gz /home/worker
   chown worker: /home/worker/worker-secret.tar.gz
   sudo -u worker /bin/bash -c 'cd ~/; tar -xzvf worker-secret.tar.gz'
+}
+
+# wait for worker user in shared /home volume
+_wait_for_worker() {
+  if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
+    while read i; do
+      if [ "$i" = id_rsa.pub ]; then
+        break;
+      fi;
+    done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
+  fi
 }
 
 # run slurmd
@@ -63,7 +77,8 @@ _slurmd() {
 ### main ###
 _sshd_host
 _munge_start_using_key
-_ssh_copy_worker
+# _ssh_copy_worker
+_wait_for_worker
 _slurmd
 
 tail -f /dev/null
