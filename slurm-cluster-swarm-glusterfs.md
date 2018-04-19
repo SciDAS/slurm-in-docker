@@ -215,7 +215,7 @@ docker plugin install \
   trajano/glusterfs-volume-plugin \
   --grant-all-permissions \
   --disable
-docker plugin set glusterfs SERVERS=172.25.8.171,172.25.8.171
+docker plugin set glusterfs SERVERS=172.25.8.171,172.25.8.172
 docker plugin enable glusterfs
 ```
 Sample output from one of the nodes
@@ -232,7 +232,7 @@ latest: Pulling from trajano/glusterfs-volume-plugin
 Digest: sha256:1d60cd35ae19e5b6ea48b59db3fa82af7c3d9ea9c29eb77738682970e731773b
 Status: Downloaded newer image for trajano/glusterfs-volume-plugin:latest
 Installed plugin trajano/glusterfs-volume-plugin
-$ docker plugin set glusterfs SERVERS=172.25.8.171,172.25.8.171
+$ docker plugin set glusterfs SERVERS=172.25.8.171,172.25.8.172
 $ docker plugin enable glusterfs
 glusterfs
 ```
