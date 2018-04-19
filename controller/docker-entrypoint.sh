@@ -41,7 +41,7 @@ _munge_start() {
   chmod 0711 /var/lib/munge
   chmod 0700 /var/log/munge
   chmod 0755 /var/run/munge
-  /sbin/create-munge-key -fr
+  /sbin/create-munge-key -f
   sudo -u munge /sbin/munged
   munge -n
   munge -n | unmunge
@@ -160,13 +160,19 @@ EOF
 # run slurmctld
 _slurmctld() {
   if $USE_SLURMDBD; then
-    if [ ! -f /.secret/slurmdbd.conf ]; then
-      while read i; do
-        if [ "$i" = slurmdbd.conf ]; then
-          break;
-        fi;
-      done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-    fi
+    echo -n "cheking for slurmdbd.conf"
+    while [ ! -f /.secret/slurmdbd.conf ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # if [ ! -f /.secret/slurmdbd.conf ]; then
+    #   while read i; do
+    #     if [ "$i" = slurmdbd.conf ]; then
+    #       break;
+    #     fi;
+    #   done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
+    # fi
   fi
   mkdir -p /var/spool/slurm/ctld \
     /var/spool/slurm/d \

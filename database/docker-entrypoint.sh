@@ -37,11 +37,17 @@ _mariadb_start() {
 # start munge using existing key
 _munge_start_using_key() {
   if [ ! -f /.secret/munge.key ]; then
-    while read i; do
-      if [ "$i" = munge.key ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
+    echo -n "cheking for munge.key"
+    while [ ! -f /.secret/munge.key ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # while read i; do
+    #   if [ "$i" = munge.key ]; then
+    #     break;
+    #   fi;
+    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
   fi
   cp /.secret/munge.key /etc/munge/munge.key
   chown -R munge: /etc/munge /var/lib/munge /var/log/munge /var/run/munge
@@ -73,11 +79,17 @@ _ssh_copy_worker() {
 # wait for worker user in shared /home volume
 _wait_for_worker() {
   if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
-    while read i; do
-      if [ "$i" = id_rsa.pub ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
+    echo -n "cheking for id_rsa.pub"
+    while [ ! -f /home/worker/.ssh/id_rsa.pub ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # while read i; do
+    #   if [ "$i" = id_rsa.pub ]; then
+    #     break;
+    #   fi;
+    # done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
   fi
 }
 

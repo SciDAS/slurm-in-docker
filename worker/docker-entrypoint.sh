@@ -12,13 +12,19 @@ _sshd_host() {
 
 # start munge using existing key
 _munge_start_using_key() {
-  if [ ! -f /.secret/munge.key ]; then
-    while read i; do
-      if [ "$i" = munge.key ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-  fi
+  echo -n "cheking for munge.key"
+  while [ ! -f /.secret/munge.key ]; do
+    echo -n "."
+    sleep 1
+  done
+  echo ""
+  # if [ ! -f /.secret/munge.key ]; then
+  #   while read i; do
+  #     if [ "$i" = munge.key ]; then
+  #       break;
+  #     fi;
+  #   done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
+  # fi
   cp /.secret/munge.key /etc/munge/munge.key
   chown -R munge: /etc/munge /var/lib/munge /var/log/munge /var/run/munge
   chmod 0700 /etc/munge
@@ -35,11 +41,17 @@ _munge_start_using_key() {
 # setup worker ssh to be passwordless
 _ssh_copy_worker() {
   if [ ! -f /.secret/worker-secret.tar.gz ]; then
-    while read i; do
-      if [ "$i" = worker-secret.tar.gz ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
+    echo -n "cheking for worker-secret.tar.gz"
+    while [ ! -f /.secret/worker-secret.tar.gz ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # while read i; do
+    #   if [ "$i" = worker-secret.tar.gz ]; then
+    #     break;
+    #   fi;
+    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
   fi
   cp /.secret/worker-secret.tar.gz /home/worker
   chown worker: /home/worker/worker-secret.tar.gz
@@ -49,22 +61,34 @@ _ssh_copy_worker() {
 # wait for worker user in shared /home volume
 _wait_for_worker() {
   if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
-    while read i; do
-      if [ "$i" = id_rsa.pub ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
+    echo -n "cheking for id_rsa.pub"
+    while [ ! -f /home/worker/.ssh/id_rsa.pub ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # while read i; do
+    #   if [ "$i" = id_rsa.pub ]; then
+    #     break;
+    #   fi;
+    # done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
   fi
 }
 
 # run slurmd
 _slurmd() {
   if [ ! -f /.secret/slurm.conf ]; then
-    while read i; do
-      if [ "$i" = slurm.conf ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
+    echo -n "cheking for slurm.conf"
+    while [ ! -f /.secret/slurm.conf ]; do
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+    # while read i; do
+    #   if [ "$i" = slurm.conf ]; then
+    #     break;
+    #   fi;
+    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
   fi
   mkdir -p /var/spool/slurm/d
   chown slurm: /var/spool/slurm/d
