@@ -13,18 +13,20 @@ RUN groupadd -g $MUNGE_UID munge \
   && groupadd -g $WORKER_UID worker \
   && useradd  -m -c "Workflow user" -d /home/worker -u $WORKER_UID -g worker  -s /bin/bash worker
 
+# install packages for general functionality
 RUN yum -y install \
   epel-release \
   && yum -y install \
   sudo \
+  wget \
+  which \
   mariadb-server \
   mariadb-devel \
   munge \
   munge-libs \
   munge-devel \
   openssh-server \
-  openssh-clients \
-  inotify-tools
+  openssh-clients
 
 # install slurm 17.11.5
 COPY rpms /packages

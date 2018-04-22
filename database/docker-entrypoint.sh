@@ -43,11 +43,6 @@ _munge_start_using_key() {
       sleep 1
     done
     echo ""
-    # while read i; do
-    #   if [ "$i" = munge.key ]; then
-    #     break;
-    #   fi;
-    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
   fi
   cp /.secret/munge.key /etc/munge/munge.key
   chown -R munge: /etc/munge /var/lib/munge /var/log/munge /var/run/munge
@@ -61,21 +56,6 @@ _munge_start_using_key() {
   remunge
 }
 
-### NO LONGER USED ###
-# setup worker ssh to be passwordless
-_ssh_copy_worker() {
-  if [ ! -f /.secret/worker-secret.tar.gz ]; then
-    while read i; do
-      if [ "$i" = worker-secret.tar.gz ]; then
-        break;
-      fi;
-    done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-  fi
-  cp /.secret/worker-secret.tar.gz /home/worker
-  chown worker: /home/worker/worker-secret.tar.gz
-  sudo -u worker /bin/bash -c 'cd ~/; tar -xzvf worker-secret.tar.gz'
-}
-
 # wait for worker user in shared /home volume
 _wait_for_worker() {
   if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
@@ -85,11 +65,6 @@ _wait_for_worker() {
       sleep 1
     done
     echo ""
-    # while read i; do
-    #   if [ "$i" = id_rsa.pub ]; then
-    #     break;
-    #   fi;
-    # done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
   fi
 }
 
@@ -144,7 +119,6 @@ _slurmdbd() {
   chown slurm: /var/spool/slurm/d \
     /var/log/slurm
   _generate_slurmdbd_conf
-  # cp /etc/slurm/slurmdbd.conf.example /etc/slurm/slurmdbd.conf
   /usr/sbin/slurmdbd
   cp /etc/slurm/slurmdbd.conf /.secret/slurmdbd.conf
 }
@@ -153,7 +127,6 @@ _slurmdbd() {
 _sshd_host
 _mariadb_start
 _munge_start_using_key
-# _ssh_copy_worker
 _wait_for_worker
 _slurmdbd
 
