@@ -562,7 +562,7 @@ work/
 
 Also note that new log files have been created.
 
-```
+```console
 $ ls -alh $HOME | grep .nextflow
 -rw-rw-r--  1 worker worker 6.6K Apr 22 18:13 .nextflow.log
 -rw-rw-r--  1 worker worker 6.7K Apr 22 18:13 .nextflow.log.1
