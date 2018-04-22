@@ -18,13 +18,6 @@ _munge_start_using_key() {
     sleep 1
   done
   echo ""
-  # if [ ! -f /.secret/munge.key ]; then
-  #   while read i; do
-  #     if [ "$i" = munge.key ]; then
-  #       break;
-  #     fi;
-  #   done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-  # fi
   cp /.secret/munge.key /etc/munge/munge.key
   chown -R munge: /etc/munge /var/lib/munge /var/log/munge /var/run/munge
   chmod 0700 /etc/munge
@@ -37,27 +30,6 @@ _munge_start_using_key() {
   remunge
 }
 
-### NO LONGER USED ###
-# setup worker ssh to be passwordless
-_ssh_copy_worker() {
-  if [ ! -f /.secret/worker-secret.tar.gz ]; then
-    echo -n "cheking for worker-secret.tar.gz"
-    while [ ! -f /.secret/worker-secret.tar.gz ]; do
-      echo -n "."
-      sleep 1
-    done
-    echo ""
-    # while read i; do
-    #   if [ "$i" = worker-secret.tar.gz ]; then
-    #     break;
-    #   fi;
-    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-  fi
-  cp /.secret/worker-secret.tar.gz /home/worker
-  chown worker: /home/worker/worker-secret.tar.gz
-  sudo -u worker /bin/bash -c 'cd ~/; tar -xzvf worker-secret.tar.gz'
-}
-
 # wait for worker user in shared /home volume
 _wait_for_worker() {
   if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
@@ -67,11 +39,6 @@ _wait_for_worker() {
       sleep 1
     done
     echo ""
-    # while read i; do
-    #   if [ "$i" = id_rsa.pub ]; then
-    #     break;
-    #   fi;
-    # done < <(inotifywait -e create,open --format '%f' --quiet /home/worker/.ssh --monitor)
   fi
 }
 
@@ -84,11 +51,6 @@ _slurmd() {
       sleep 1
     done
     echo ""
-    # while read i; do
-    #   if [ "$i" = slurm.conf ]; then
-    #     break;
-    #   fi;
-    # done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
   fi
   mkdir -p /var/spool/slurm/d
   chown slurm: /var/spool/slurm/d
@@ -101,7 +63,6 @@ _slurmd() {
 ### main ###
 _sshd_host
 _munge_start_using_key
-# _ssh_copy_worker
 _wait_for_worker
 _slurmd
 

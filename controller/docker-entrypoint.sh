@@ -166,13 +166,6 @@ _slurmctld() {
       sleep 1
     done
     echo ""
-    # if [ ! -f /.secret/slurmdbd.conf ]; then
-    #   while read i; do
-    #     if [ "$i" = slurmdbd.conf ]; then
-    #       break;
-    #     fi;
-    #   done < <(inotifywait -e create,open --format '%f' --quiet /.secret --monitor)
-    # fi
   fi
   mkdir -p /var/spool/slurm/ctld \
     /var/spool/slurm/d \

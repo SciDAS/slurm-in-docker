@@ -9,10 +9,10 @@ ENV DBD_ADDR=database \
   STORAGE_PASS=password \
   STORAGE_USER=slurm
 
-### Uncomment when development is complete ###
-# RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
-#   && yum clean all \
-#   && rm -rf /var/cache/yum
+# clean up
+RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
+  && yum clean all \
+  && rm -rf /var/cache/yum
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
