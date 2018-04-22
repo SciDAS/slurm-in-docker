@@ -738,11 +738,9 @@ The network and volumes can be removed using their representative `docker` comma
     ...
     local               slurmindocker_home
     local               slurmindocker_secret
-    local               slurmindocker_storage
-    $ docker volume rm slurmindocker_home slurmindocker_secret slurmindocker_storage
+    $ docker volume rm slurmindocker_home slurmindocker_secret
     slurmindocker_home
     slurmindocker_secret
-    slurmindocker_storage
     ```
 
 - Network
