@@ -20,6 +20,7 @@ RUN yum -y install \
   sudo \
   wget \
   which \
+  tree \
   mariadb-server \
   mariadb-devel \
   munge \
