@@ -11,6 +11,8 @@ Images include:
 - [Slurm 17.11.5](https://slurm.schedmd.com) - installed from [rpm packages](packages)
 - [OpenMPI 3.0.1](https://www.open-mpi.org/doc/current/) - installed from [rpm packages](packages)
 - [Lmod 7.7](http://lmod.readthedocs.io/en/latest/index.html) - installed from [distribution files](https://sourceforge.net/projects/lmod/files/)
+  - [Lmod module packages for CentOS 7](https://github.com/mjstealey/lmod-modules-centos) - Organized for Slurm-in-Docker use
+  - [Using Lmod with Slurm-in-Docker](using-lmod-with-slurm-in-docker.md) documentation
 
 ## Contents
 
