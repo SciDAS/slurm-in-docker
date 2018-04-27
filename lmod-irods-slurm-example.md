@@ -120,7 +120,7 @@ Validate the icommands works from the worker nodes
 
 Using passwordless ssh to `worker01`
 
-```
+```console
 $ ssh worker01
 Last login: Fri Apr 27 11:54:59 2018 from controller.slurm-in-docker_slurm
 $ module load irods-icommands/4.1.11
@@ -167,7 +167,6 @@ Create file `irods_batch.job`
 #SBATCH -e %N_%A_%a_err.txt
 
 ### Load modules
-
 module load irods-icommands/4.1.11
 
 ### Run code (request 2 CPU to run job)
