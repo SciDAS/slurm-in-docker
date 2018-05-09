@@ -1,6 +1,6 @@
 # Using Lmod with Slurm-in-Docker
 
-This tutorial makes use of the [docker-compose-lmod.yml](https://github.com/mjstealey/slurm-in-docker/blob/master/docker-compose-lmod.yml) which defines two additional volume mounts.
+This tutorial makes use of the [docker-compose-lmod.yml](https://github.com/scidas/slurm-in-docker/blob/master/docker-compose-lmod.yml) which defines two additional volume mounts.
 
 1. `modules` - pre-compiled binary files that will be reference by the `module` or `ml` commands in `lmod`
 2. `modulefiles` - pre-defined Lua scripts that enable the proper file linkage and environment definitions for the modules.
@@ -21,13 +21,13 @@ We are going to choose `/opt/apps/modulefiles/Linux` to define the hierarchy for
 
 ## Adding modules
 
-The [lmod-modules-centos](https://github.com/mjstealey/lmod-modules-centos) repository defines how to make Lmod modules specific to the CentOS 7 based [Slurm in Docker](https://github.com/mjstealey/slurm-in-docker) project.
+The [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) repository defines how to make Lmod modules specific to the CentOS 7 based [Slurm in Docker](https://github.com/scidas/slurm-in-docker) project.
 
 Once built, the modules and modulefiles need to be copied into the corresponding `modules` and `modulefiles` directories using a specific directory structure.
 
 Using java 8 as an example, we'd populate the directories as such.
 
-- Assumes the [slurm-in-docker](https://github.com/mjstealey/slurm-in-docker) and [lmod-modules-centos](https://github.com/mjstealey/lmod-modules-centos) repositories are at the same directory level on the host for relative path commands.
+- Assumes the [slurm-in-docker](https://github.com/scidas/slurm-in-docker) and [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) repositories are at the same directory level on the host for relative path commands.
 - Module versions used herein are for reference purposes and subject to change as updates occur.
 
 ### create `modules` and `modulefiles` directories for java
@@ -54,7 +54,7 @@ cd -
 
 ### test java module
 
-Using the [docker-compose-lmod.yml](https://github.com/mjstealey/slurm-in-docker/blob/master/docker-compose-lmod.yml) file, test the newly created java module.
+Using the [docker-compose-lmod.yml](https://github.com/scidas/slurm-in-docker/blob/master/docker-compose-lmod.yml) file, test the newly created java module.
 
 The docker-compose-lmod.yml definition add two new volume mounts which make the modules and modulefiles available to the controller and worker nodes at run time.
 
@@ -159,7 +159,7 @@ Learn more about Nextflow from the [official docs](https://www.nextflow.io/docs/
 
 Enable the Nextflow module within the Slurm cluster and run a hello world workflow accross our two worker nodes.
 
-- Assumes the [slurm-in-docker](https://github.com/mjstealey/slurm-in-docker) and [lmod-modules-centos](https://github.com/mjstealey/lmod-modules-centos) repositories are at the same directory level on the host for relative path commands.
+- Assumes the [slurm-in-docker](https://github.com/scidas/slurm-in-docker) and [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) repositories are at the same directory level on the host for relative path commands.
 - Module versions used herein are for reference purposes and subject to change as updates occur.
 
 ### create `modules` and `modulefiles` directories for java
@@ -200,7 +200,7 @@ cd -
 
 ### test nextflow module
 
-Using the [docker-compose-lmod.yml](https://github.com/mjstealey/slurm-in-docker/blob/master/docker-compose-lmod.yml) file, test the newly created nextflow module.
+Using the [docker-compose-lmod.yml](https://github.com/scidas/slurm-in-docker/blob/master/docker-compose-lmod.yml) file, test the newly created nextflow module.
 
 ```
 docker-compose -f docker-compose-lmod.yml up -d

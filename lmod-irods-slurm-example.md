@@ -1,12 +1,12 @@
 # Lmod / iRODS Slurm Example
 
-This example is based on the 4-node cluster deploy as described in [https://github.com/mjstealey/slurm-in-docker](https://github.com/mjstealey/slurm-in-docker).
+This example is based on the 4-node cluster deploy as described in [https://github.com/scidas/slurm-in-docker](https://github.com/scidas/slurm-in-docker).
 
 ## Setup
 
-Prior to moving forward the user should have a running 4-node cluster deployed as described in [Slurm in Docker](https://github.com/mjstealey/slurm-in-docker).
+Prior to moving forward the user should have a running 4-node cluster deployed as described in [Slurm in Docker](https://github.com/scidas/slurm-in-docker).
 
-Additionally the user should have the [irods-commands](https://github.com/mjstealey/lmod-modules-centos/tree/master/irods-icommands) Lmod packages deployed as described in [Lmod module packages for CentOS 7](https://github.com/mjstealey/lmod-modules-centos)
+Additionally the user should have the [irods-commands](https://github.com/scidas/lmod-modules-centos/tree/master/irods-icommands) Lmod packages deployed as described in [Lmod module packages for CentOS 7](https://github.com/scidas/lmod-modules-centos)
 
 ## Test
 

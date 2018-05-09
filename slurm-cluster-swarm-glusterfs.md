@@ -1,6 +1,6 @@
 # Swarm based Slurm cluster using GlusterFS
 
-The [Slurm in Docker](https://github.com/mjstealey/slurm-in-docker) code has been extended to run in a distributed docker cluster using [docker swarm](https://docs.docker.com/engine/swarm/) with shared storage being managed by [GlusterFS](https://www.gluster.org).
+The [Slurm in Docker](https://github.com/scidas/slurm-in-docker) code has been extended to run in a distributed docker cluster using [docker swarm](https://docs.docker.com/engine/swarm/) with shared storage being managed by [GlusterFS](https://www.gluster.org).
 
 The participating nodes are all VMs within the RENCI VMware ESXi cluster (edc).
 
@@ -315,7 +315,7 @@ Creating service slurm_visualizer
 
 ## Testing
 
-At this point the nodes should all be vialbe and ready to work. Using the visulazer, determine where the **controller** node is and log into it to issue the slurm commands as described in the main [README](https://github.com/mjstealey/slurm-in-docker/blob/master/README.md) file.
+At this point the nodes should all be vialbe and ready to work. Using the visulazer, determine where the **controller** node is and log into it to issue the slurm commands as described in the main [README](https://github.com/scidas/slurm-in-docker/blob/master/README.md) file.
 
 ![Slurm cluster](https://user-images.githubusercontent.com/5332509/39018939-a968faf2-43f5-11e8-8c91-d87b51fd25cb.png)
 
