@@ -53,7 +53,7 @@ cp -r ../packages/centos-7/rpms .
 Build the base image
 
 ```
-docker build -t mjstealey/slurm.base:17.11.5 .
+docker build -t scidas/slurm.base:17.11.5 .
 ```
 
 Verify image build
@@ -61,11 +61,11 @@ Verify image build
 ```console
 $ docker images
 REPOSITORY             TAG                 IMAGE ID            CREATED                  SIZE
-mjstealey/slurm.base   17.11.5             1600621cb483        Less than a second ago   819MB
+scidas/slurm.base   17.11.5             1600621cb483        Less than a second ago   819MB
 ...
 ```
 
-All images defined in `docker-compose.yml` will be built from the `mjstealey/slurm.base:17.11.5` base image
+All images defined in `docker-compose.yml` will be built from the `scidas/slurm.base:17.11.5` base image
 
 ## Usage
 
@@ -80,10 +80,10 @@ Four containers should be observed running when completed
 ```console
 $ docker ps
 CONTAINER ID        IMAGE                                COMMAND                  CREATED             STATUS              PORTS                                              NAMES
-995183e9391e        mjstealey/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker01
-bdd7c8daaca2        mjstealey/slurm.database:17.11.5     "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   database
-a8382a486989        mjstealey/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker02
-24e951854109        mjstealey/slurm.controller:17.11.5   "/usr/local/bin/tini…"   11 seconds ago      Up 31 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   controller
+995183e9391e        scidas/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker01
+bdd7c8daaca2        scidas/slurm.database:17.11.5     "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   database
+a8382a486989        scidas/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker02
+24e951854109        scidas/slurm.controller:17.11.5   "/usr/local/bin/tini…"   11 seconds ago      Up 31 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   controller
 ```
 
 ## Examples using Slurm
