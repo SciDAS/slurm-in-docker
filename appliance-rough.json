@@ -1,0 +1,63 @@
+{
+    "id": "slurm",
+    "containers": [
+        {
+          "id": "controller",
+          "type": "service",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "network_mode": "container",
+          "image": "mjstealey/slurm.controller:17.11.5",
+          "is_privileged": true
+        },
+        {
+          "id": "worker",
+          "type": "service",
+          "network_mode": "container",
+          "image": "mjstealey/slurm.worker:17.11.5",
+          "resources": {
+            "cpus": 4,
+            "mem": 4096,
+            "disk": 4096
+          },
+          "is_privileged": true,
+          "args": [
+            "--master", "@master"
+          ]
+        },
+        {
+          "id": "submitter",
+          "type": "service",
+          "resources": {
+            "cpus": 2,
+            "mem": 2048,
+            "disk": 2048
+          },
+          "network_mode": "host",
+          "image": "<SUBMITTER_IMG>",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10022,
+              "protocol": "tcp"
+            }
+            ],
+            "args": [
+              "--pools", "osg-flock.grid.iu.edu,@master",
+              "--ssh_key", "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC303e2y8aUaMQ1IkHWnGFyb5XykxOM5pLK83XFxWZMKsbYcgmkoODZ4w4COratlQPyMXSz7yaFUbYUccXjIjz8SDZf/9c3xI0UuILOiVfb5Ql/16cimtK65ogns1mHzACCpXZ+mKJSDlGcLFfTGixsF8RaF0tZDY/NIxl8P+3EdY0svBbBaI3fc4cOYL5/Q5S8QvSacxXBAPHEzq7RD2Bq0WDxAhiH4XSXfe/xk+TORZYK3CE3Oqu9p77nrFM7W3M5khsb5Qg/z0W1TQmVWvo5/i3QbDK6YaWhw/0DXjfCeEtdlTVdIq1EJxMWuJnm5IptB1EtG9GBhuHq5Ct2XkUh",
+              "--ssh_port", "10022",
+              "--irods_user", "<USER>",
+              "--irods_password", "<PASSWORD>",
+              "--irods_host", "scidas-scratch1.clemson.edu",
+              "--irods_zone", "scidasZone",
+              "--irods_port", "1247"
+            ],
+            "env": {
+                "SCIDAS_URL": "http://scidas-sys.marathon.containerip.dcos.thisdcos.directory:9090"
+            }
+        }
+    ]
+}
