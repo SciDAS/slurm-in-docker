@@ -1,7 +1,24 @@
 # Issue 13 - allow user to pass in their own file 
 
-To use a custom slurm.conf file, the user must simply place it in the controller/ directory. 
-TODO: Check validity of custom slurm.conf file.
+To use a custom slurm.conf file, the user must place it in the controller/ directory and build the image.  
+```
+cd controller/
+docker built -t <custom-conf-img> .
+```
+Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
+```
+services:
+  controller:
+    build:
+      context: ./controller
+      dockerfile: Dockerfile
+    image: <custom-conf-img>
+    container_name: controller
+....
+```
+The user can then proceed as normal
+
+TODO: Have software check validity of custom slurm.conf file.  
 
 # Slurm in Docker
 
