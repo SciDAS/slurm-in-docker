@@ -7,6 +7,7 @@ docker built -t <custom-conf-img> .
 ```
 Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
 ```
+....
 services:
   controller:
     build:
