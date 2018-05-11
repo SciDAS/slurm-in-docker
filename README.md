@@ -1,3 +1,8 @@
+# Issue 13 - allow user to pass in their own file 
+
+To use a custom slurm.conf file, the user must simply place it in the controller/ directory. 
+TODO: Check validity of custom slurm.conf file.
+
 # Slurm in Docker
 
 **WORK IN PROGRESS**
