@@ -59,7 +59,7 @@ _copy_secrets() {
 
 # generate slurm.conf
 _generate_slurm_conf() {
-  cat > /etc/slurm/slurm.conf <<EOF
+ cat > /etc/slurm/slurm.conf <<EOF
 #
 # Example slurm.conf file. Please run configurator.html
 # (in doc/html) to build a configuration file customized
@@ -175,7 +175,15 @@ _slurmctld() {
     /var/log/slurm
   touch /var/log/slurmctld.log
   chown slurm: /var/log/slurmctld.log
-  _generate_slurm_conf
+#Check for user submitted conf file
+  userConf=$(find . -name slurm.conf | wc -l)
+  if [[ $userConf -gt 0 ]] ; 
+    then 
+      echo "Custom slurm.conf found!"
+      mv slurm.conf /etc/slurm/slurm.conf 
+    else
+      _generate_slurm_conf
+  fi
   sacctmgr -i add cluster ${CLUSTER_NAME}
   sleep 2s
   /usr/sbin/slurmctld
