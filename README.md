@@ -1,26 +1,3 @@
-# Issue 13 - allow user to pass in their own file 
-
-To use a custom slurm.conf file, the user must place it in the controller/ directory and build the image.  
-```
-cd controller/
-docker built -t <custom-conf-img> .
-```
-Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
-```
-....
-services:
-  controller:
-    build:
-      context: ./controller
-      dockerfile: Dockerfile
-    image: <custom-conf-img>
-    container_name: controller
-....
-```
-The user can then proceed as normal
-
-TODO: Have software check validity of custom slurm.conf file.  
-
 # Slurm in Docker
 
 **WORK IN PROGRESS**
@@ -59,6 +36,34 @@ controller | Slurm Primary Controller | controller.local.dev
 database | Slurm Primary Database Daemon | database.local.dev
 worker01 | Slurm Worker | worker01.local.dev
 worker02 | Slurm Worker | worker02.local.dev
+
+## Configure slurm.conf
+
+Users may use the default slurm.conf file generated in /controller/docker-entrypoint.sh, or create their own to better fit their system.
+
+The [Slurm Version 17.11 Configuration Tool](https://slurm.schedmd.com/configurator.html) is a useful resource for creating custom slurm.conf files.
+
+To use a custom slurm.conf file, the user must place it in the controller/ directory and build the image.  
+```
+cd controller/
+docker built -t <custom-conf-img-name> .
+```
+Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
+```
+....
+services:
+  controller:
+    build:
+      context: ./controller
+      dockerfile: Dockerfile
+    image: <custom-conf-img-name>
+    container_name: controller
+....
+```
+The user can then proceed as normal
+
+TODO: Have software check validity of custom slurm.conf file.  
+
 
 ## Build
 
