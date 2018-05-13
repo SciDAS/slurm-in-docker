@@ -46,7 +46,7 @@ The [Slurm Version 17.11 Configuration Tool](https://slurm.schedmd.com/configura
 To use a custom slurm.conf file, the user must place it in the controller/ directory and build the image.  
 ```
 cd controller/
-docker built -t <custom-conf-img-name> .
+docker build -t <custom-conf-img-name> .
 ```
 Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
 ```
