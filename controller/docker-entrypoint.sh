@@ -152,7 +152,7 @@ AccountingStoragePort=$ACCOUNTING_STORAGE_PORT
 #AccountingStorageUser=
 #
 # COMPUTE NODES
-NodeName=worker[01-02] RealMemory=1998 CPUs=1 State=UNKNOWN
+NodeName=worker[01-02] RealMemory=1800 CPUs=1 State=UNKNOWN
 PartitionName=$PARTITION_NAME Nodes=ALL Default=YES MaxTime=INFINITE State=UP
 EOF
 }

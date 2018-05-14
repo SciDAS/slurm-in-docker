@@ -714,6 +714,13 @@ MASTER: Number of MPI tasks is: 2
 
 ## Tear down
 
+The containers, networks, and volumes associated with the cluster can be torn down by simply running:
+```
+./teardown.sh
+```
+
+Each step of this teardown may also be run individually:
+
 The containers can be stopped and removed using `docker-compose`
 
 ```console
