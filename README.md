@@ -43,27 +43,9 @@ Users may use the default slurm.conf file generated in [docker-entrypoint.sh](ht
 
 The [Slurm Version 17.11 Configuration Tool](https://slurm.schedmd.com/configurator.html) is a useful resource for creating custom slurm.conf files.
 
-To use a custom slurm.conf file, the user must place it in the controller/ directory and build the image.  
-```
-cd controller/
-docker build -t <custom-conf-img-name> .
-```
-Then the user needs to change the controller image in [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/master/docker-compose.yml) to the one they just built.
-```
-....
-services:
-  controller:
-    build:
-      context: ./controller
-      dockerfile: Dockerfile
-    image: <custom-conf-img-name>
-    container_name: controller
-....
-```
-The user can then proceed as normal
+To use a custom slurm.conf file, the user must place it in the [slurm-conf](https://github.com/SciDAS/slurm-in-docker/tree/13-pass-conf/slurm-conf) directory before starting the cluster.
 
-TODO: Have software check validity of custom slurm.conf file.  
-
+TODO: Have software check validity of custom slurm.conf file.
 
 ## Build
 

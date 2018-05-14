@@ -43,7 +43,6 @@ RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
   && rm -f /Lmod-7.7.tar.bz2
 
 #Passing conf file
-COPY docker-entrypoint.sh slur*.conf ./ 
-
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/tini", "--", "/docker-entrypoint.sh"]

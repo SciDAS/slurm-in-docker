@@ -176,11 +176,10 @@ _slurmctld() {
   touch /var/log/slurmctld.log
   chown slurm: /var/log/slurmctld.log
 #Check for user submitted conf file
-  userConf=$(find . -name slurm.conf | wc -l)
-  if [[ $userConf -gt 0 ]] ; 
+  userConf=$(find /etc/slurm -name slurm.conf | wc -l)
+  if [[ $userConf -eq 1 ]] ; 
     then 
       echo "Custom slurm.conf found!"
-      mv slurm.conf /etc/slurm/slurm.conf 
     else
       _generate_slurm_conf
   fi
