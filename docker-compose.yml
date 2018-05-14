@@ -11,6 +11,7 @@ services:
     volumes:
       - home:/home
       - secret:/.secret
+      - ./slurm-conf:/etc/slurm
     restart: always
     hostname: controller.local.dev
     networks:

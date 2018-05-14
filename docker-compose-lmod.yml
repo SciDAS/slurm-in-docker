@@ -13,6 +13,7 @@ services:
       - secret:/.secret
       - ./modules:/opt/apps/Linux
       - ./modulefiles:/opt/apps/modulefiles/Linux
+      - ./slurm-conf:/etc/slurm/
     restart: always
     hostname: controller.local.dev
     networks:
