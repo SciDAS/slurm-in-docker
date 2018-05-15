@@ -37,6 +37,21 @@ database | Slurm Primary Database Daemon | database.local.dev
 worker01 | Slurm Worker | worker01.local.dev
 worker02 | Slurm Worker | worker02.local.dev
 
+## Configure slurm.conf/slurmdbd.conf
+
+Users may use the default slurm.conf file generated in [docker-entrypoint.sh](https://github.com/SciDAS/slurm-in-docker/blob/master/controller/docker-entrypoint.sh), or preferably create one to better fit their system. 
+
+The [Slurm Version 17.11 Configuration Tool](https://slurm.schedmd.com/configurator.html) is a useful resource for creating custom slurm.conf files.
+
+Steps to add user profided slurm.conf/slurmdbd.conf:
+
+1. Create ```home/config``` and ```secret``` directories: ```$ mkdir -p home/config secret```
+2. Copy configuration files to the ```home/config``` directory: ```$ cp <user-provided-slurm.conf> home/config/slurm.conf; cp <user-provided-slurmdbd.conf> home/config/slurmdbd.conf```
+
+The user can then proceed as normal.
+
+TODO: Have software check validity of custom configuration files.
+
 ## Build
 
 Build the slurm RPM files by following the instructions in the [packages](packages) directory.
