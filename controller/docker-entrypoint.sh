@@ -12,6 +12,10 @@ _sshd_host() {
 
 # setup worker ssh to be passwordless
 _ssh_worker() {
+  if [[ ! -d /home/worker ]]; then
+    mkdir -p /home/worker
+    chown -R worker:worker /home/worker
+  fi
   cat > /home/worker/setup-worker-ssh.sh <<'EOF2'
 mkdir -p ~/.ssh
 chmod 0700 ~/.ssh
@@ -175,7 +179,13 @@ _slurmctld() {
     /var/log/slurm
   touch /var/log/slurmctld.log
   chown slurm: /var/log/slurmctld.log
-  _generate_slurm_conf
+  if [[ ! -f /home/config/slurm.conf ]]; then
+    echo "### generate slurm.conf ###"
+    _generate_slurm_conf
+  else
+    echo "### use provided slurm.conf ###"
+    cp /home/config/slurm.conf /etc/slurm/slurm.conf
+  fi
   sacctmgr -i add cluster ${CLUSTER_NAME}
   sleep 2s
   /usr/sbin/slurmctld

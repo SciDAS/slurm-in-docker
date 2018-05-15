@@ -9,8 +9,8 @@ services:
     container_name: controller
     privileged: true
     volumes:
-      - home:/home
-      - secret:/.secret
+      - ./home:/home
+      - ./secret:/.secret
     restart: always
     hostname: controller.local.dev
     networks:
@@ -36,8 +36,8 @@ services:
     container_name: database
     privileged: true
     volumes:
-      - home:/home
-      - secret:/.secret
+      - ./home:/home
+      - ./secret:/.secret
     restart: always
     hostname: database.local.dev
     networks:
@@ -61,8 +61,8 @@ services:
     container_name: worker01
     privileged: true
     volumes:
-      - home:/home
-      - secret:/.secret
+      - ./home:/home
+      - ./secret:/.secret
     restart: always
     hostname: worker01.local.dev
     networks:
@@ -82,8 +82,8 @@ services:
     container_name: worker02
     privileged: true
     volumes:
-      - home:/home
-      - secret:/.secret
+      - ./home:/home
+      - ./secret:/.secret
     restart: always
     hostname: worker02.local.dev
     networks:
@@ -92,10 +92,6 @@ services:
       CONTROL_MACHINE: controller
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
-
-volumes:
-  home:
-  secret:
 
 networks:
   slurm:

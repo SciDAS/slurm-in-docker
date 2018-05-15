@@ -1,5 +1,7 @@
 .idea
 .DS_Store
+home
+secret
 modules
 modulefiles
 base/rpms
