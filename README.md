@@ -47,11 +47,11 @@ Steps to add user profided slurm.conf/slurmdbd.conf:
 
 1. Create ```home/config``` and ```secret``` directories: 
 
-```$ mkdir -p home/config secret```
+```mkdir -p home/config secret```
 
 2. Copy configuration files to the ```home/config``` directory:
 
-```$ cp <user-provided-slurm.conf> home/config/slurm.conf; cp <user-provided-slurmdbd.conf> home/config/slurmdbd.conf```
+```cp <user-provided-slurm.conf> home/config/slurm.conf; cp <user-provided-slurmdbd.conf> home/config/slurmdbd.conf```
 
 The user can then proceed as normal.
 
