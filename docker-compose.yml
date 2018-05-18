@@ -93,6 +93,24 @@ services:
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
 
+#Temporary - for testing purposes
+
+  gfs01:
+    image: gluster/gluster-centos
+    privileged: true
+    restart: always
+    hostname: gfs01.local.dev
+    networks:
+      - slurm
+
+  gfs02:
+    image: gluster/gluster-centos
+    privileged: true
+    restart: always
+    hostname: gfs02.local.dev
+    networks:
+      - slurm
+
 volumes:
   home:
   secret:

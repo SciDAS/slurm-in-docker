@@ -27,7 +27,15 @@ RUN yum -y install \
   munge-libs \
   munge-devel \
   openssh-server \
-  openssh-clients
+  openssh-clients \
+  fuse \
+  fuse-libs \
+  openib \
+  libibverbs \
+  glusterfs \
+  glusterfs-fuse
+
+RUN modprobe fuse 
 
 # install slurm 17.11.5
 COPY rpms /packages
