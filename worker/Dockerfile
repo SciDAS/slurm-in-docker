@@ -28,6 +28,10 @@ RUN ./configure --prefix=/opt/apps \
 
 WORKDIR /home/worker
 
+ENV NFS_SERVER=nfs-server \
+  NFS_SERVER_DIRS=/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles \
+  NFS_CLIENT_DIRS=/secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux
+
 # clean up
 RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
   && yum clean all \

@@ -27,7 +27,8 @@ RUN yum -y install \
   munge-libs \
   munge-devel \
   openssh-server \
-  openssh-clients
+  openssh-clients \
+  nfs-utils
 
 # install slurm 17.11.5
 COPY rpms /packages

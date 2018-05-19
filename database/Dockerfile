@@ -7,7 +7,10 @@ ENV DBD_ADDR=database \
   STORAGE_HOST=database.local.dev \
   STORAGE_PORT=3306 \
   STORAGE_PASS=password \
-  STORAGE_USER=slurm
+  STORAGE_USER=slurm \
+  NFS_SERVER=nfs-server \
+  NFS_SERVER_DIRS=/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles \
+  NFS_CLIENT_DIRS=/secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux
 
 # clean up
 RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
