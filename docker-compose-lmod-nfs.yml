@@ -38,6 +38,7 @@ services:
       ACCOUNTING_STORAGE_PORT: 6819
       COMPUTE_NODES: worker01 worker02
       PARTITION_NAME: docker
+      MOUNT_TYPE: nfs
       NFS_SERVER: nfs-server
       NFS_SERVER_DIRS: '/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles'
       NFS_CLIENT_DIRS: '/.secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
@@ -63,9 +64,10 @@ services:
       STORAGE_PORT: 3306
       STORAGE_PASS: password
       STORAGE_USER: slurm
+      MOUNT_TYPE: nfs
       NFS_SERVER: nfs-server
-      NFS_SERVER_DIRS: '/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles'
-      NFS_CLIENT_DIRS: '/.secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
+      NFS_SERVER_DIRS: '/nfs/secret:/nfs/home'
+      NFS_CLIENT_DIRS: '/.secret:/home'
 
   worker01:
     build:
@@ -85,6 +87,7 @@ services:
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
       NFS_SERVER: nfs-server
+      MOUNT_TYPE: nfs
       NFS_SERVER_DIRS: '/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles'
       NFS_CLIENT_DIRS: '/.secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
 
@@ -105,6 +108,7 @@ services:
       CONTROL_MACHINE: controller
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
+      MOUNT_TYPE: nfs
       NFS_SERVER: nfs-server
       NFS_SERVER_DIRS: '/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles'
       NFS_CLIENT_DIRS: '/.secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux'

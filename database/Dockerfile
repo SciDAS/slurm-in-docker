@@ -8,6 +8,7 @@ ENV DBD_ADDR=database \
   STORAGE_PORT=3306 \
   STORAGE_PASS=password \
   STORAGE_USER=slurm \
+  MOUNT_TYPE=local \
   NFS_SERVER=nfs-server \
   NFS_SERVER_DIRS=/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles \
   NFS_CLIENT_DIRS=/secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux

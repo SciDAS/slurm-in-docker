@@ -35,6 +35,7 @@ ENV USE_SLURMDBD=true \
   ACCOUNTING_STORAGE_HOST=database \
   ACCOUNTING_STORAGE_PORT=6819 \
   PARTITION_NAME=docker \
+  MOUNT_TYPE=local \
   NFS_SERVER=nfs-server \
   NFS_SERVER_DIRS=/nfs/secret:/nfs/home:/nfs/modules:/nfs/modulefiles \
   NFS_CLIENT_DIRS=/secret:/home:/opt/apps/Linux:/opt/apps/modulefiles/Linux
