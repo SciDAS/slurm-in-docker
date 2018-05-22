@@ -1,0 +1,109 @@
+{
+    "id": "slurm",
+    "containers": [
+        {
+          "id": "controller",
+          "type": "service",
+          "resources": {
+            "cpus": 2,
+            "mem": 2048,
+            "disk": 2048
+          },
+          "network_mode": "host",
+          "image": "mjstealey/slurm.controller:17.11.5",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10022,
+              "protocol": "tcp"
+            }
+            ],
+            "args": [
+              "--use_slurmbdb", "true",
+              "--cluster_name", "snowflake",
+	      "--control_machine", "controller",
+              "--slurmctld_port", "6817",
+              "--slurmd_port", "6818",
+              "--accounting_storage_host", "database",
+              "--accounting_storage_port", "6819",
+              "--compute_nodes", "worker01 worker02",
+              "--partition_name", "docker",
+              "--pools", "osg-flock.grid.iu.edu,@master",
+              "--ssh_key", "<PUBLIC_RSA>",
+              "--ssh_port", "10022",
+              "--irods_user", "<USER>",
+              "--irods_password", "<PASSWORD>",
+              "--irods_host", "scidas-scratch1.clemson.edu",
+              "--irods_zone", "scidasZone",
+              "--irods_port", "1247"
+            ],
+            "env": {
+                "SCIDAS_URL": "http://scidas-sys.marathon.containerip.dcos.thisdcos.directory:9090"
+            }
+        },
+        {
+          "id": "worker01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "scidas/slurm.worker:17.11.5",
+          "resources": {
+            "cpus": 4,
+            "mem": 4096,
+            "disk": 4096
+          },
+          "is_privileged": true,
+          "args": [
+            "--control_machine", "@controller",
+            "--accounting_storage_host", "database",
+            "--compute_nodes", "worker01 worker02"
+          ]
+        },
+        {
+          "id": "worker02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "scidas/slurm.worker:17.11.5",
+          "resources": {
+            "cpus": 4,
+            "mem": 4096,
+            "disk": 4096
+          },
+          "is_privileged": true,
+          "args": [
+            "--control_machine", "@controller",
+            "--accounting_storage_host", "database",
+            "--compute_nodes", "worker01 worker02"
+          ]
+        },
+        {
+          "id": "database",
+          "type": "service",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "network_mode": "container",
+          "image": "scidas/slurm.database:17.11.5",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10022,
+              "protocol": "tcp"
+            }
+            ],
+            "args": [
+              "--dbd_addr", "database",
+              "--dbd_host", "database",
+              "--dbd_port", "6819",
+              "--storage_host", "database.local.dev",
+              "--storage_port", "3306",
+              "--storage_pass", "password",
+              "--storage_user", "slurm",
+            ],
+            "env": {
+                "SCIDAS_URL": "http://scidas-sys.marathon.containerip.dcos.thisdcos.directory:9090"
+            }
+        }
+    ]
+}
