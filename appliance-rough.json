@@ -1,20 +1,20 @@
 {
-    "id": "slurm",
+    "id": "slurmrough",
     "containers": [
         {
           "id": "controller",
           "type": "service",
           "resources": {
-            "cpus": 2,
-            "mem": 2048,
-            "disk": 2048
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
           },
           "network_mode": "host",
-          "image": "mjstealey/slurm.controller:17.11.5",
+          "image": "scidas/slurm.controller:17.11.5",
           "is_privileged": true,
           "ports": [
             {
-              "container_port": 10022,
+              "container_port": 10222,
               "protocol": "tcp"
             }
             ],
@@ -28,24 +28,15 @@
               "--accounting_storage_port", "6819",
               "--compute_nodes", "worker01 worker02",
               "--partition_name", "docker",
-              "--pools", "osg-flock.grid.iu.edu,@master",
-              "--ssh_key", "<PUBLIC_RSA>",
-              "--ssh_port", "10022",
-              "--irods_user", "<USER>",
-              "--irods_password", "<PASSWORD>",
-              "--irods_host", "scidas-scratch1.clemson.edu",
-              "--irods_zone", "scidasZone",
-              "--irods_port", "1247"
-            ],
-            "env": {
-                "SCIDAS_URL": "http://scidas-sys.marathon.containerip.dcos.thisdcos.directory:9090"
-            }
+              "--ssh_key", "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDeVecn1CAvFeOp+aECFq4WJ9pey/TINMzgqm1T9RuChGWn3ql9Kmk+Zwxm6XsPB3mJSX5G5Ut8//KDz/9PAIhwEq0/UDleDrzr6YHGsUPaZZzY+5PDeLcHxxUROyQBVHkdFp40Xrnla5FMorhz2ajeYoKei5S3YVe7fKMoIdBOkYJTz56i6JDHbirgWdPuc5zIH0T0aok7oADdvz6PqScyU9dLn56R6heCnZ9LB9aek4+pzV/MC6lXr4/ii5cfZT0TWVU0LEoLDr3zgZGFQFjKHcgzRDFW3ias/5p5tNmm1d0EKOaP3fZdDmC71XDdRtyJDkHUZVCp1qOXiyBNr4mV cole@cole-VirtualBox",
+              "--ssh_port", "10022"
+		]
         },
         {
           "id": "worker01",
           "type": "service",
           "network_mode": "container",
-          "image": "scidas/slurm.worker:17.11.5",
+          "image": "cbmckni/slurm-sciapp-worker:latest",
           "resources": {
             "cpus": 4,
             "mem": 4096,
@@ -62,7 +53,7 @@
           "id": "worker02",
           "type": "service",
           "network_mode": "container",
-          "image": "scidas/slurm.worker:17.11.5",
+          "image": "cbmckni/slurm-sciapp-worker:latest",
           "resources": {
             "cpus": 4,
             "mem": 4096,
@@ -84,7 +75,7 @@
             "disk": 1024
           },
           "network_mode": "container",
-          "image": "scidas/slurm.database:17.11.5",
+          "image": "cbmckni/slurm-sciapp-db:latest",
           "is_privileged": true,
           "ports": [
             {
@@ -99,11 +90,32 @@
               "--storage_host", "database.local.dev",
               "--storage_port", "3306",
               "--storage_pass", "password",
-              "--storage_user", "slurm",
-            ],
-            "env": {
-                "SCIDAS_URL": "http://scidas-sys.marathon.containerip.dcos.thisdcos.directory:9090"
-            }
+              "--storage_user", "slurm"
+            ]
+        },
+        {
+          "id": "gfs01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
+        },
+        {
+          "id": "gfs02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
         }
     ]
 }

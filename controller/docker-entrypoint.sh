@@ -1,6 +1,53 @@
 #!/usr/bin/env bash
 set -e
 
+#get arguments
+usage() {
+  cat <<-EOF
+  Usage: $0 -db <use_slurmbdb> -n <cluster_name> -c <control_machine> -ctlp <slurmctld_port>
+            -dp <slurmd_port> -ah <accounting_storage_host> -ap <accounting_storage_port>
+            -cn <compute_nodes> -pn <partition_name> -k <ssh_key> -p <ssh_port>
+
+  Initial setup of Slurm 
+
+  Options:
+      -db
+      -n
+      -c
+      -ctlp
+      -dp
+      -ah
+      -ap
+      -cn
+      -pn
+      -k
+      -p
+      
+EOF
+  exit 1
+}
+
+while getopts db:n:c:ctlp:dp:ah:ap:cn:pn:k:p OPT;do
+    case "${OPT}" in
+        db) USE_SLURMBDB=${OPTARG};; 
+	n) CLUSTER_NAME=${OPTARG};; 
+	c) CONTROL_MACHINE=${OPTARG};; 
+	ctlp) SLURMCTLD_PORT=${OPTARG};; 
+	dp) SLURMD_PORT=${OPTARG};; 
+	ah) ACCOUNTING_STORAGE_HOST=${OPTARG};; 
+	ap) ACCOUNTING_STORAGE_PORT=${OPTARG};; 
+	cn) COMPUTE_NODES=${OPTARG};; 
+	pn) PARTITION_NAMES=${OPTARG};; 
+	k) SSH_KEY=${OPTARG};; 
+        p) SSH_PORT=${OPTARG};;
+    esac
+done
+
+#[ ! ${FLOCK_TO} -o ! ${SSH_KEY} -o ! ${IRODS_USER} -o ! ${IRODS_PW} ] && usage
+
+#Add ssh key
+echo "${SSH_KEY}" >> .ssh/authorized_keys
+
 # start sshd server
 _sshd_host() {
   if [ ! -d /var/run/sshd ]; then

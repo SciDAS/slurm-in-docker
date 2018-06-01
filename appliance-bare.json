@@ -1,0 +1,71 @@
+{
+    "id": "slurm",
+    "containers": [
+        {
+          "id": "controller",
+          "type": "service",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "network_mode": "host",
+          "image": "scidas/slurm.controller:17.11.5",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10222,
+              "protocol": "tcp"
+            }
+            ]
+        },
+        {
+          "id": "worker01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "scidas/slurm.worker:17.11.5",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "is_privileged": true
+        },
+        {
+          "id": "worker02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "scidas/slurm.worker:17.11.5",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "is_privileged": true
+        },
+        {
+          "id": "gfs01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
+        },
+        {
+          "id": "worker02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
+        }
+    ]
+}
