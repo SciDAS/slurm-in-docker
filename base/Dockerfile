@@ -27,7 +27,17 @@ RUN yum -y install \
   munge-libs \
   munge-devel \
   openssh-server \
-  openssh-clients
+  openssh-clients \
+  centos-release-gluster \
+  fuse \
+  fuse-libs \
+  openib \
+  libibverbs \
+  yum -y install \
+  glusterfs \
+  glusterfs-fuse \
+  glusterfs-rdma
+
 
 # install slurm 17.11.5
 COPY rpms /packages
@@ -43,4 +53,4 @@ VOLUME ["/home", "/.secret"]
 # 6817:         Slurm Ctl D
 # 6818:         Slurm D
 # 6819:         Slurm DBD
-EXPOSE 22 3306 6817 6818 6819
+EXPOSE 22 3306 6817 6818 6819 24007 24008 49152-49199

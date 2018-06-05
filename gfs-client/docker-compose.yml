@@ -1,0 +1,15 @@
+version: '3.0'
+services:
+
+  client:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: client
+    container_name: client
+    privileged: true
+    hostname: client.gfs.local
+    environment:
+      GFS_SERVERS: 'galera-1.edc.renci.org galera-2.edc.renci.org'
+      GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
+      GFS_CLIENT_DIRS: '/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
