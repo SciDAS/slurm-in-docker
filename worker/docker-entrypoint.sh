@@ -1,32 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-#get arguments
-usage() {
-  cat <<-EOF
-  Usage: $0 -c <control_machine> -ah <accounting_storage_host> -cn <compute_nodes> 
-
-  Initial setup of Slurm 
-
-  Options:
-      -c
-      -ah
-      -cn
-      
-EOF
-  exit 1
-}
-
-while getopts c:ah:cn OPT;do
-    case "${OPT}" in
-        db) USE_SLURMBDB=${OPTARG};; 
-	ah) ACCOUNTING_STORAGE_HOST=${OPTARG};; 
-	cn) COMPUTE_NODES=${OPTARG};; 
-    esac
-done
-
-#[ ! ${FLOCK_TO} -o ! ${SSH_KEY} -o ! ${IRODS_USER} -o ! ${IRODS_PW} ] && usage
-
 # start sshd server
 _sshd_host() {
   if [ ! -d /var/run/sshd ]; then

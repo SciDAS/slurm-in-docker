@@ -1,42 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-#get arguments
-usage() {
-  cat <<-EOF
-  Usage: $0 -da <dbd_addr> -dh <dbd_host> -dp <dbd_port> 
-            -sth <storage_host> -stp <storage_port> -u <storage_user>
-            -p <storage_pass> 
-
-  Initial setup of Slurm 
-
-  Options:
-      -da
-      -dh
-      -dp
-      -sh
-      -sp
-      -u
-      -p
-      
-EOF
-  exit 1
-}
-
-while getopts da:dh:dp:sth:stp:u:p OPT;do
-    case "${OPT}" in
-        da) DBD_ADDR=${OPTARG};; 
-	dh) DBD_ADDR=${OPTARG};;
-	dp) DBD_ADDR=${OPTARG};;
-        sth) STORAGE_ADDR=${OPTARG};;
-        stp) STORAGE_ADDR=${OPTARG};;
-        u) STORAGE_ADDR=${OPTARG};;
-        p) STORAGE_ADDR=${OPTARG};;
-    esac
-done
-
-#[ ! ${FLOCK_TO} -o ! ${SSH_KEY} -o ! ${IRODS_USER} -o ! ${IRODS_PW} ] && usage
-
 SLURM_ACCT_DB_SQL=/slurm_acct_db.sql
 
 # start sshd server

@@ -1,5 +1,5 @@
 {
-    "id": "slurmrough",
+    "id": "slurmrough06",
     "containers": [
         {
           "id": "controller",
@@ -10,7 +10,7 @@
             "disk": 1024
           },
           "network_mode": "host",
-          "image": "scidas/slurm.controller:17.11.5",
+          "image": "cbmckni/slurm-sciapp-ctld:latest",
           "is_privileged": true,
           "ports": [
             {
@@ -18,19 +18,17 @@
               "protocol": "tcp"
             }
             ],
-            "args": [
-              "--use_slurmbdb", "true",
-              "--cluster_name", "snowflake",
-	      "--control_machine", "controller",
-              "--slurmctld_port", "6817",
-              "--slurmd_port", "6818",
-              "--accounting_storage_host", "database",
-              "--accounting_storage_port", "6819",
-              "--compute_nodes", "worker01 worker02",
-              "--partition_name", "docker",
-              "--ssh_key", "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDeVecn1CAvFeOp+aECFq4WJ9pey/TINMzgqm1T9RuChGWn3ql9Kmk+Zwxm6XsPB3mJSX5G5Ut8//KDz/9PAIhwEq0/UDleDrzr6YHGsUPaZZzY+5PDeLcHxxUROyQBVHkdFp40Xrnla5FMorhz2ajeYoKei5S3YVe7fKMoIdBOkYJTz56i6JDHbirgWdPuc5zIH0T0aok7oADdvz6PqScyU9dLn56R6heCnZ9LB9aek4+pzV/MC6lXr4/ii5cfZT0TWVU0LEoLDr3zgZGFQFjKHcgzRDFW3ias/5p5tNmm1d0EKOaP3fZdDmC71XDdRtyJDkHUZVCp1qOXiyBNr4mV cole@cole-VirtualBox",
-              "--ssh_port", "10022"
-		]
+            "env": {
+              "USE_SLURMDBD": "true",
+              "CLUSTER_NAME": "snowflake",
+              "CONTROL_MACHINE": "controller",
+              "SLURMCTLD_PORT": "6817",
+              "SLURMD_PORT": "6818",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "ACCOUNTING_STORAGE_PORT": "6819",
+              "COMPUTE_NODES": "worker01 worker02",
+              "PARTITION_NAME": "docker"
+            }
         },
         {
           "id": "worker01",
@@ -38,16 +36,16 @@
           "network_mode": "container",
           "image": "cbmckni/slurm-sciapp-worker:latest",
           "resources": {
-            "cpus": 4,
+            "cpus": 1,
             "mem": 4096,
             "disk": 4096
           },
           "is_privileged": true,
-          "args": [
-            "--control_machine", "@controller",
-            "--accounting_storage_host", "database",
-            "--compute_nodes", "worker01 worker02"
-          ]
+          "env": {
+              "CONTROL_MACHINE": "controller",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "COMPUTE_NODES": "worker01 worker02"
+            }
         },
         {
           "id": "worker02",
@@ -55,16 +53,16 @@
           "network_mode": "container",
           "image": "cbmckni/slurm-sciapp-worker:latest",
           "resources": {
-            "cpus": 4,
+            "cpus": 1,
             "mem": 4096,
             "disk": 4096
           },
           "is_privileged": true,
-          "args": [
-            "--control_machine", "@controller",
-            "--accounting_storage_host", "database",
-            "--compute_nodes", "worker01 worker02"
-          ]
+          "env": {
+              "CONTROL_MACHINE": "controller",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "COMPUTE_NODES": "worker01 worker02"
+            }
         },
         {
           "id": "database",
@@ -83,15 +81,15 @@
               "protocol": "tcp"
             }
             ],
-            "args": [
-              "--dbd_addr", "database",
-              "--dbd_host", "database",
-              "--dbd_port", "6819",
-              "--storage_host", "database.local.dev",
-              "--storage_port", "3306",
-              "--storage_pass", "password",
-              "--storage_user", "slurm"
-            ]
+            "env": {
+              "DBD_ADDR": "database",
+              "DBD_HOST": "database",
+              "DBD_PORT": "6819",
+              "STORAGE_HOST": "database.local.dev",
+              "STORAGE_PORT": "3306",
+              "STORAGE_PASS": "password",
+              "STORAGE_USER": "slurm"
+            }
         },
         {
           "id": "gfs01",
