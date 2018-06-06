@@ -1,0 +1,119 @@
+{
+    "id": "slurmrough06",
+    "containers": [
+        {
+          "id": "controller",
+          "type": "service",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "network_mode": "host",
+          "image": "cbmckni/slurm-sciapp-ctld:latest",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10222,
+              "protocol": "tcp"
+            }
+            ],
+            "env": {
+              "USE_SLURMDBD": "true",
+              "CLUSTER_NAME": "snowflake",
+              "CONTROL_MACHINE": "controller",
+              "SLURMCTLD_PORT": "6817",
+              "SLURMD_PORT": "6818",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "ACCOUNTING_STORAGE_PORT": "6819",
+              "COMPUTE_NODES": "worker01 worker02",
+              "PARTITION_NAME": "docker"
+            }
+        },
+        {
+          "id": "worker01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "cbmckni/slurm-sciapp-worker:latest",
+          "resources": {
+            "cpus": 1,
+            "mem": 4096,
+            "disk": 4096
+          },
+          "is_privileged": true,
+          "env": {
+              "CONTROL_MACHINE": "controller",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "COMPUTE_NODES": "worker01 worker02"
+            }
+        },
+        {
+          "id": "worker02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "cbmckni/slurm-sciapp-worker:latest",
+          "resources": {
+            "cpus": 1,
+            "mem": 4096,
+            "disk": 4096
+          },
+          "is_privileged": true,
+          "env": {
+              "CONTROL_MACHINE": "controller",
+              "ACCOUNTING_STORAGE_HOST": "database",
+              "COMPUTE_NODES": "worker01 worker02"
+            }
+        },
+        {
+          "id": "database",
+          "type": "service",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 1024
+          },
+          "network_mode": "container",
+          "image": "cbmckni/slurm-sciapp-db:latest",
+          "is_privileged": true,
+          "ports": [
+            {
+              "container_port": 10022,
+              "protocol": "tcp"
+            }
+            ],
+            "env": {
+              "DBD_ADDR": "database",
+              "DBD_HOST": "database",
+              "DBD_PORT": "6819",
+              "STORAGE_HOST": "database.local.dev",
+              "STORAGE_PORT": "3306",
+              "STORAGE_PASS": "password",
+              "STORAGE_USER": "slurm"
+            }
+        },
+        {
+          "id": "gfs01",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
+        },
+        {
+          "id": "gfs02",
+          "type": "service",
+          "network_mode": "container",
+          "image": "gluster/gluster-centos",
+          "resources": {
+            "cpus": 1,
+            "mem": 1024,
+            "disk": 4096
+          },
+          "is_privileged": true
+        }
+    ]
+}
