@@ -4,18 +4,15 @@ services:
   controller:
     build:
       context: ./controller
-      dockerfile: Dockerfile
-    image: scidas/slurm.controller:17.11.5
+      dockerfile: Dockerfile.gfs
+    image: scidas/slurm.controller:gfs
     container_name: controller
     privileged: true
-#    volumes:
-#      - ./home:/home
-#      - ./secret:/.secret
     restart: always
-    hostname: controller.local.dev
     networks:
       - slurm
     environment:
+      NODE_NAME: controller
       USE_SLURMDBD: 'true'
       CLUSTER_NAME: snowflake
       CONTROL_MACHINE: controller
@@ -23,99 +20,80 @@ services:
       SLURMD_PORT: 6818
       ACCOUNTING_STORAGE_HOST: database
       ACCOUNTING_STORAGE_PORT: 6819
-      COMPUTE_NODES: worker01 worker02
+      STORAGE_PASS: password
+      STORAGE_USER: slurm
+      COMPUTE_NODES: george charky
       PARTITION_NAME: docker
-      GFS_SERVERS: 'galera-1.edc.renci.org'
+      GFS_SERVERS: 'YOUR_GFS_SERVER'
       GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
       GFS_CLIENT_DIRS: '/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
 
   database:
     build:
       context: ./database
-      dockerfile: Dockerfile
-    image: scidas/slurm.database:17.11.5
+      dockerfile: Dockerfile.gfs
+    image: scidas/slurm.database:gfs
     depends_on:
       - controller
     container_name: database
     privileged: true
-#    volumes:
-#      - ./home:/home
-#      - ./secret:/.secret
     restart: always
-    hostname: database.local.dev
     networks:
       - slurm
     environment:
+      NODE_NAME: database
       DBD_ADDR: database
-      DBD_HOST: database
+      DBD_HOST: localhost
       DBD_PORT: 6819
-      STORAGE_HOST: database.local.dev
+      STORAGE_HOST: database
       STORAGE_PORT: 3306
       STORAGE_PASS: password
       STORAGE_USER: slurm
-      GFS_SERVERS: 'galera-2.edc.renci.org'
+      GFS_SERVERS: 'YOUR_GFS_SERVER'
       GFS_SERVER_DIRS: '/brick/home:/brick/secret'
       GFS_CLIENT_DIRS: '/home:/.secret'
 
   worker01:
     build:
       context: ./worker
-      dockerfile: Dockerfile
-    image: scidas/slurm.worker:17.11.5
+      dockerfile: Dockerfile.gfs
+    image: scidas/slurm.worker:gfs
     depends_on:
       - controller
     container_name: worker01
     privileged: true
-#    volumes:
-#      - ./home:/home
-#      - ./secret:/.secret
     restart: always
-    hostname: worker01.local.dev
     networks:
       - slurm
     environment:
+      NODE_NAME: worker01
       CONTROL_MACHINE: controller
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
-      GFS_SERVERS: 'galera-1.edc.renci.org'
+      GFS_SERVERS: 'YOUR_GFS_SERVER'
       GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
       GFS_CLIENT_DIRS: '/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
 
   worker02:
     build:
       context: ./worker
-      dockerfile: Dockerfile
-    image: scidas/slurm.worker:17.11.5
+      dockerfile: Dockerfile.gfs
+    image: scidas/slurm.worker:gfs
     depends_on:
       - controller
     container_name: worker02
     privileged: true
-#    volumes:
-#      - ./home:/home
-#      - ./secret:/.secret
     restart: always
-    hostname: worker02.local.dev
     networks:
       - slurm
     environment:
+      NODE_NAME: george
       CONTROL_MACHINE: controller
       ACCOUNTING_STORAGE_HOST: database
       COMPUTE_NODES: worker01 worker02
-      GFS_SERVERS: 'galera-2.edc.renci.org'
+      GFS_SERVERS: 'YOUR_GFS_SERVER'
       GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
       GFS_CLIENT_DIRS: '/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
-
-  visualizer:
-    image: dockersamples/visualizer:stable
-    ports:
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-    networks:
-      - slurm
 
 networks:
   slurm:

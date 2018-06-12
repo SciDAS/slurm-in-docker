@@ -10,6 +10,6 @@ services:
     privileged: true
     hostname: client.gfs.local
     environment:
-      GFS_SERVERS: 'galera-1.edc.renci.org galera-2.edc.renci.org'
+      GFS_SERVERS: 'YOUR_GFS_SERVER' # <-- THIS
       GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
-      GFS_CLIENT_DIRS: '/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux'
+      GFS_CLIENT_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'

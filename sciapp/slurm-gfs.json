@@ -1,0 +1,127 @@
+{
+  "id": "slurm-gfs",
+  "containers": [
+    {
+      "id": "controller",
+      "type": "service",
+      "resources":
+      {
+        "cpus": 1,
+        "mem": 4096,
+        "disk": 8192
+      },
+      "network_mode": "container",
+      "image": "scidas/slurm.controller:gfs",
+      "is_privileged": true,
+      "ports":[
+        {
+          "host_port": 20022,
+          "container_port": 22,
+          "protocol": "tcp"
+        }
+      ],
+      "env":
+      {
+        "NODE_NAME": "@controller controller",
+        "USE_SLURMDBD": "true",
+        "CLUSTER_NAME": "snowflake",
+        "CONTROL_MACHINE":"@controller",
+        "SLURMCTLD_PORT": "6817",
+        "SLURMD_PORT": "6818",
+        "ACCOUNTING_STORAGE_HOST": "@db",
+        "ACCOUNTING_STORAGE_PORT": "6819",
+        "COMPUTE_NODES": "@worker01 @worker02",
+        "PARTITION_NAME": "docker",
+        "GFS_SERVERS": "YOUR_GFS_SERVER",
+        "GFS_SERVER_DIRS": "/brick/home:/brick/secret:/brick/modules:/brick/modulefiles",
+        "GFS_CLIENT_DIRS": "/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux"
+      },
+      "force_pull_image": true
+    },
+    {
+      "id": "db",
+      "dependencies": [
+        "controller"
+      ],
+      "type": "service",
+      "resources":
+      {
+        "cpus": 1,
+        "mem": 4096,
+        "disk": 4096
+      },
+      "network_mode": "container",
+      "image": "scidas/slurm.database:gfs",
+      "is_privileged": true,
+      "env":
+      {
+        "NODE_NAME": "@db db",
+        "DBD_ADDR": "@db",
+        "DBD_HOST": "localhost",
+        "DBD_PORT": "6819",
+        "STORAGE_HOST": "@db",
+        "STORAGE_PORT": "3306",
+        "STORAGE_PASS": "password",
+        "STORAGE_USER": "slurm",
+        "GFS_SERVERS": "YOUR_GFS_SERVER",
+        "GFS_SERVER_DIRS": "/brick/home:/brick/secret",
+        "GFS_CLIENT_DIRS": "/home:/.secret"
+      },
+      "force_pull_image": true
+    },
+    {
+      "id": "worker01",
+      "dependencies": [
+        "controller"
+      ],
+      "type": "service",
+      "resources":
+      {
+        "cpus": 1,
+        "mem": 4096,
+        "disk": 8192
+      },
+      "network_mode": "container",
+      "image": "scidas/slurm.worker:gfs",
+      "is_privileged": true,
+      "env":
+      {
+        "NODE_NAME": "@worker01 worker01",
+        "CONTROL_MACHINE":"@controller",
+        "ACCOUNTING_STORAGE_HOST": "@db",
+        "COMPUTE_NODES": "@worker01 @worker02",
+        "GFS_SERVERS": "YOUR_GFS_SERVER",
+        "GFS_SERVER_DIRS": "/brick/home:/brick/secret:/brick/modules:/brick/modulefiles",
+        "GFS_CLIENT_DIRS": "/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux"
+      },
+      "force_pull_image": true
+    },
+    {
+      "id": "worker02",
+      "dependencies": [
+        "controller"
+      ],
+      "type": "service",
+      "resources":
+      {
+        "cpus": 1,
+        "mem": 4096,
+        "disk": 8192
+      },
+      "network_mode": "container",
+      "image": "scidas/slurm.worker:gfs",
+      "is_privileged": true,
+      "env":
+      {
+        "NODE_NAME": "@worker02 worker02",
+        "CONTROL_MACHINE":"@controller",
+        "ACCOUNTING_STORAGE_HOST": "@db",
+        "COMPUTE_NODES": "@worker01 @worker02",
+        "GFS_SERVERS": "YOUR_GFS_SERVER",
+        "GFS_SERVER_DIRS": "/brick/home:/brick/secret:/brick/modules:/brick/modulefiles",
+        "GFS_CLIENT_DIRS": "/home:/.secret:/opt/apps/Linux:/opt/apps/modulefiles/Linux"
+      },
+      "force_pull_image": true
+    }
+  ]
+}

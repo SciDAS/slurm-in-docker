@@ -1,0 +1,20 @@
+FROM scidas/slurm.base:gfs
+MAINTAINER Michael J. Stealey <stealey@renci.org>
+
+ENV NODE_NAME=database \
+  DBD_ADDR=database \
+  DBD_HOST=localhost \
+  DBD_PORT=6819 \
+  STORAGE_HOST=database \
+  STORAGE_PORT=3306 \
+  STORAGE_PASS=password \
+  STORAGE_USER=slurm
+
+# clean up
+RUN rm -f /packages/slurm-*.rpm /packages/openmpi-*.rpm \
+  && yum clean all \
+  && rm -rf /var/cache/yum
+
+COPY docker-entrypoint-gfs.sh /docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/tini", "--", "/docker-entrypoint.sh"]
