@@ -72,7 +72,7 @@
     {
       "id": "worker01",
       "dependencies": [
-        "controller"
+        "db"
       ],
       "type": "service",
       "resources":
@@ -99,7 +99,7 @@
     {
       "id": "worker02",
       "dependencies": [
-        "controller"
+        "db"
       ],
       "type": "service",
       "resources":
