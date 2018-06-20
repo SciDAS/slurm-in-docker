@@ -5,7 +5,7 @@ services:
     build:
       context: ./controller
       dockerfile: Dockerfile
-    image: scidas/slurm.controller:17.11.5
+    image: controller-toil-cwl:latest
     container_name: controller
     privileged: true
     volumes:

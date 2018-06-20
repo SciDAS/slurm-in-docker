@@ -8,6 +8,16 @@ RUN yum -y install \
   && yum -y localinstall \
   /packages/openmpi-*.rpm
 
+# install python-pip and toil
+RUN yum -y install epel-release && yum -y update
+RUN yum -y install python-pip python-devel
+RUN pip install --upgrade pip && pip install virtualenv
+
+# Setup virtualenv
+RUN virtualenv -p /usr/bin/python /toil-cwl
+RUN . /toil-cwl/bin/activate
+RUN pip install toil[cwl]
+
 # install Lmod 7.7
 RUN yum -y install \
   lua-posix \
