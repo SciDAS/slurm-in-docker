@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+_add_extra_hosts() {
+  IFS=' ' read -r -a EXTRA_HOSTS_ARRAY <<< "$EXTRA_HOSTS"
+  for i in "${!EXTRA_HOSTS_ARRAY[@]}"; do
+    extra_ip="$(cut -d ':' -f1 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    extra_hostname="$(cut -d ':' -f2 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    cat >> /etc/hosts <<EOF
+${extra_ip} ${extra_hostname}
+EOF
+  done
+  cat /etc/hosts
+}
+
 _gfs_init_fstab() {
   if [[ ! -f /etc/fstab ]]; then
     cat > /etc/fstab << EOF
@@ -21,7 +33,7 @@ _gfs_export_mounts() {
       echo "### INFO: fstab entry for ${MNT_SERVER_ARRAY[$i]} already exists ###"
     else
       cat >> /etc/fstab <<EOF
-${gfs_server}:/$(basename ${MNT_SERVER_ARRAY[$i]}) ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
+${gfs_server}:${MNT_SERVER_ARRAY[$i]} ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
 EOF
     fi
   done
@@ -346,7 +358,22 @@ EOF
   done
 }
 
+### move module files from gfs volume to inside each container
+_move_module_files() {
+  if [ -d "/modules" ]; then
+    echo "Copying modules..."
+    cp -R /modules /opt/apps/Linux
+  fi 
+  if [ -d "/modulefiles" ]; then
+    echo "Copying modulefiles..."
+    mkdir -p /opt/apps/modulefiles/Linux
+    cp -R /modulefiles/* /opt/apps/modulefiles/Linux
+  fi
+}
+
 ### main ###
+_add_extra_hosts
+
 gfs_server=$(echo $GFS_SERVERS | cut -d ' ' -f 1)
 echo "connecting to ${gfs_server}"
 until [ $(ping ${gfs_server} -c 3 2>&1 >/dev/null)$? ]; do
@@ -361,17 +388,25 @@ mount -a
 sleep 1s
 _gfs_mount_info
 
+#_move_module_files
+echo "check 1"
 _check_for_secret_files
 export CONTROL_MACHINE=$(hostname)
 export MY_HOST_ENTRY=$(cat /etc/hosts | grep $(hostname))' '${NODE_NAME}
+echo "check 2"
 _node_name_etc_hosts
-
+echo "check 3"
 _sshd_host
+echo "check 4"
 _ssh_root
+echo "check 5"
 _ssh_worker
+echo "check 6"
 _munge_start
+echo "check 7"
 _copy_secrets
+echo "check 8"
 _slurmctld
-
+echo "check 9"
 _monitor_etc_hosts
 tail -f /dev/null

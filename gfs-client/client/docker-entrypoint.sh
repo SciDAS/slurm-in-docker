@@ -1,6 +1,18 @@
 #!/bin/bash
 set -e
 
+_add_extra_hosts() {
+  IFS=' ' read -r -a EXTRA_HOSTS_ARRAY <<< "$EXTRA_HOSTS"
+  for i in "${!EXTRA_HOSTS_ARRAY[@]}"; do
+    extra_ip="$(cut -d ':' -f1 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    extra_hostname="$(cut -d ':' -f2 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    cat >> /etc/hosts <<EOF
+${extra_ip} ${extra_hostname}
+EOF
+  done
+  cat /etc/hosts
+}
+
 _init_fstab() {
   if [[ ! -f /etc/fstab ]]; then
     cat > /etc/fstab << EOF
@@ -18,7 +30,7 @@ _export_gfs_mounts() {
       mkdir -p ${MNT_CLIENT_ARRAY[$i]}
     fi
     cat >> /etc/fstab <<EOF
-${gfs_server}:$(basename ${MNT_SERVER_ARRAY[$i]}) ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
+${gfs_server}:${MNT_SERVER_ARRAY[$i]} ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
 EOF
   done
   cat /etc/fstab
@@ -34,6 +46,8 @@ _mount_info() {
 }
 
 ### main ###
+_add_extra_hosts
+
 gfs_server=$(echo $GFS_SERVERS | cut -d ' ' -f 1)
 echo "connecting to ${gfs_server}"
 until [ $(ping ${gfs_server} -c 3 2>&1 >/dev/null)$? ]; do

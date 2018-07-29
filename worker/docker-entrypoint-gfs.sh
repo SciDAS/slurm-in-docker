@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+_add_extra_hosts() {
+  IFS=' ' read -r -a EXTRA_HOSTS_ARRAY <<< "$EXTRA_HOSTS"
+  for i in "${!EXTRA_HOSTS_ARRAY[@]}"; do
+    extra_ip="$(cut -d ':' -f1 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    extra_hostname="$(cut -d ':' -f2 <<<${EXTRA_HOSTS_ARRAY[$i]})"
+    cat >> /etc/hosts <<EOF
+${extra_ip} ${extra_hostname}
+EOF
+  done
+  cat /etc/hosts
+}
+
 _gfs_init_fstab() {
   if [[ ! -f /etc/fstab ]]; then
     cat > /etc/fstab << EOF
@@ -21,7 +33,7 @@ _gfs_export_mounts() {
       echo "### INFO: fstab entry for ${MNT_SERVER_ARRAY[$i]} already exists ###"
     else
       cat >> /etc/fstab <<EOF
-${gfs_server}:/$(basename ${MNT_SERVER_ARRAY[$i]}) ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
+${gfs_server}:${MNT_SERVER_ARRAY[$i]} ${MNT_CLIENT_ARRAY[$i]} glusterfs defaults,_netdev,log-level=WARNING,log-file=/var/log/gluster.log 0 0
 EOF
     fi
   done
@@ -49,7 +61,7 @@ _sshd_host() {
 # start munge using existing key
 _munge_start_using_key() {
   echo -n "cheking for munge.key"
-  while [ ! -f /.secret/munge.key ]; do
+  while [ ! -f /.secret/munge.key ]; do #EDIT
     echo -n "."
     sleep 1
   done
@@ -70,7 +82,7 @@ _munge_start_using_key() {
 # wait for worker user in shared /home volume
 _wait_for_worker() {
   if [ ! -f /home/worker/.ssh/id_rsa.pub ]; then
-    echo -n "cheking for id_rsa.pub"
+    echo -n "checking for id_rsa.pub"
     while [ ! -f /home/worker/.ssh/id_rsa.pub ]; do
       echo -n "."
       sleep 1
@@ -83,7 +95,7 @@ _wait_for_worker() {
 # run slurmd
 _slurmd() {
   if [ ! -f /.secret/slurm.conf ]; then
-    echo -n "cheking for slurm.conf"
+    echo -n "checking for slurm.conf"
     while [ ! -f /.secret/slurm.conf ]; do
       echo -n "."
       sleep 1
@@ -146,7 +158,22 @@ EOF
   done
 }
 
+### move module files from gfs volume to inside each container
+_move_module_files() {
+  if [ -d "/modules" ]; then
+    echo "Copying modules..."
+    cp -R /modules /opt/apps/Linux
+  fi 
+  if [ -d "/modulefiles" ]; then
+    echo "Copying modulefiles..."
+    mkdir -p /opt/apps/modulefiles/Linux
+    cp -R /modulefiles/* /opt/apps/modulefiles/Linux
+  fi
+}
+
 ### main ###
+_add_extra_hosts
+
 gfs_server=$(echo $GFS_SERVERS | cut -d ' ' -f 1)
 echo "connecting to ${gfs_server}"
 until [ $(ping ${gfs_server} -c 3 2>&1 >/dev/null)$? ]; do
@@ -161,6 +188,8 @@ _gfs_export_mounts
 mount -a
 sleep 1s
 _gfs_mount_info
+
+#_move_module_files
 
 echo "### waiting for controller_host_entry ###"
 while [ ! -f /.secret/controller_host_entry ]; do

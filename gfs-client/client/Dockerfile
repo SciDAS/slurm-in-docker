@@ -2,17 +2,9 @@ FROM krallin/centos-tini:7
 MAINTAINER Michael J. Stealey <michael.j.stealey@gmail.com>
 
 RUN yum -y install \
-  centos-release-gluster \
-  openssh-server \
-  wget \
-  fuse \
-  fuse-libs \
-  openib \
-  libibverbs \
-  yum -y install \
   glusterfs \
   glusterfs-fuse \
-  glusterfs-rdma
+  attr
 
 ENV GFS_SERVERS='server1' \
   GFS_SERVER_DIRS='/brick/share' \

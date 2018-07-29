@@ -1,15 +1,60 @@
 version: '3.0'
 services:
 
+  server1:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: server
+    container_name: server1
+    privileged: true
+    hostname: server1.gfs.local
+    networks:
+      - gfs
+    environment:
+      GFS_SERVERS: 'server1 server2'
+      IS_PRIMARY: 'true'
+      GFS_SERVER_DIRS: '/brick/share1:/brick/share2'
+    volumes:
+      - brick1:/brick
+
+  server2:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: server
+    container_name: server2
+    privileged: true
+    hostname: server2.gfs.local
+    networks:
+      - gfs
+    environment:
+      GFS_SERVERS: 'server1 server2'
+      IS_PRIMARY: 'false'
+      GFS_SERVER_DIRS: '/brick/share1:/brick/share2'
+    volumes:
+      - brick2:/brick
+
   client:
     build:
-      context: ./
+      context: ./client
       dockerfile: Dockerfile
     image: client
     container_name: client
     privileged: true
     hostname: client.gfs.local
+    networks:
+      - gfs
     environment:
-      GFS_SERVERS: 'YOUR_GFS_SERVER' # <-- THIS
-      GFS_SERVER_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
-      GFS_CLIENT_DIRS: '/brick/home:/brick/secret:/brick/modules:/brick/modulefiles'
+      GFS_SERVERS: 'server1 server2'
+      GFS_SERVER_DIRS: '/brick/share1:/brick/share2'
+      GFS_CLIENT_DIRS: '/mnt/share1:/mnt/share2'
+
+networks:
+  gfs:
+
+volumes:
+  brick1:
+    # external: true
+  brick2:
+    # external: true
