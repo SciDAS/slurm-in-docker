@@ -250,7 +250,7 @@ EOF
   IFS=' ' read -r -a COMPUTE_NODE_ARRAY <<< "$COMPUTE_NODES"
   for compute_node in "${COMPUTE_NODE_ARRAY[@]}"; do
     cat >> /etc/slurm/slurm.conf <<EOF
-NodeName=${compute_node} RealMemory=1800 CPUs=1 State=UNKNOWN
+NodeName=${compute_node} RealMemory=$MEM CPUs=$CPUS State=UNKNOWN
 EOF
   done
   cat >> /etc/slurm/slurm.conf <<EOF

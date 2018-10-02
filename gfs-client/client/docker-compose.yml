@@ -10,7 +10,7 @@ services:
     privileged: true
     hostname: client.gfs.local
     environment:
-      EXTRA_HOSTS: '129.114.109.13:glusterfs 129.114.108.195:gluster-w0 129.114.109.196:gluster-w1'
+      EXTRA_HOSTS: '129.114.109.172:glusterfs 129.114.109.181:gluster-w0' 
       GFS_SERVERS: 'glusterfs' # <-- node_name from above
       GFS_SERVER_DIRS: '/gv0'
       GFS_CLIENT_DIRS: '/mnt/gv0'

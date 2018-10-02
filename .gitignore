@@ -7,3 +7,4 @@ modulefiles
 base/rpms
 packages/centos-7/rpms
 gfs-client/client/data-port
+*.json

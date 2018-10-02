@@ -157,8 +157,8 @@ _slurmdbd() {
     echo "### use provided slurmdbd.conf ###"
     cp /home/config/slurmdbd.conf /etc/slurm/slurmdbd.conf
   fi
-  /usr/sbin/slurmdbd
   cp /etc/slurm/slurmdbd.conf /.secret/slurmdbd.conf
+  /usr/sbin/slurmdbd
 }
 
 ### main ###

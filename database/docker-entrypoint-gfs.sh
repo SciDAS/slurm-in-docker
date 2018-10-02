@@ -172,6 +172,7 @@ StoragePass=$STORAGE_PASS
 StorageUser=$STORAGE_USER
 StorageLoc=slurm_acct_db
 EOF
+echo "slurmdbd.conf generated!"
 }
 
 # run slurmdbd
@@ -189,9 +190,12 @@ _slurmdbd() {
     echo "### use provided slurmdbd.conf ###"
     cp /home/config/slurmdbd.conf /etc/slurm/slurmdbd.conf
   fi
-  /usr/sbin/slurmdbd
+#  /usr/sbin/slurmdbd
+  echo "Copying to ./secret"
   cp /etc/slurm/slurmdbd.conf /.secret/slurmdbd.conf
-#  /usr/sbin/slurmdbd -Dvvv ### enable for debugging (comment out call above)
+  echo "Starting slurmdbd...."
+  /usr/sbin/slurmdbd -Dvvv ### enable for debugging (comment out call above)
+  echo "Done!"
 }
 
 _node_name_etc_hosts() {
