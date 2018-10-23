@@ -1,8 +1,23 @@
-# Chameleon GFS Instructions
+# DEMO Chameleon GFS Instructions
 
 **WORK IN PROGRESS**
 
 The instructions contain the steps necesary to configure and submit a slurm-in-docker SciApp, using [Chameleon Cloud](https://www.chameleoncloud.org/) resources.
+
+**REQUIREMENTS**
+
+This demo requires the following software to be installed on the user's local machine:
+
+ - [Git](https://git-scm.com/)
+ - [Docker](https://www.docker.com/)
+ - [docker-compose](https://docs.docker.com/compose/)
+
+You will want to clone the following repos from GitHub:
+
+ - [slurm-in-docker](https://github.com/SciDAS/slurm-in-docker) (branch [glusterfs](https://github.com/SciDAS/slurm-in-docker/tree/glusterfs))
+ - [lmod-modules-centos](https://github.com/SciDAS/lmod-modules-centos) (branch [cbmckni](https://github.com/SciDAS/lmod-modules-centos/tree/cbmckni))
+
+Finally, you must have the address to a SciDAS Endpoint. An example using port 9191 looks like this: http://{ENDPOINT_IP}:9191
 
 ## Contents
 
@@ -92,7 +107,7 @@ Untar the module with ```tar -xzf git-2.17.0.tar.gz```.
 
 Once all modules are built, copy the files to the GFS servers with ```cp /mnt/data-port/modules /mnt/data-port/modulefiles /mnt/gv0```.
 
-**DEMO** Build and transfer the following modules: 
+**DEMO** Clone the "cbmckni" branch of [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos), then build and transfer the following modules: 
  - General: irods-icommands, nano, java, nextflow, git, python3
  - GEMmaker: fastqc, hisat2, samtools, sratoolkit, stringtie, trimmomatic
 
@@ -313,13 +328,17 @@ Add nextflow with ```module add java nextflow```
 
 Make a copy of the file ```nextflow.config.example``` and name it ```nextflow.config```
 
-Edit the following lines:
- - Set ```remote_list_path``` to ```/home/worker/GEMmaker/UnitTestSRAs.txt``` 
- - Set ```local_samples_path``` to ```none```
- - Set ```reference_path``` to ```/home/worker/GEMmaker/reference```
- - Set ```reference_prefix``` to ```TAIR10_Araport11``` 
- - Set ```threads``` to ```40``` 
- - Set ```queue``` to ```docker```
+Edit the following lines in [nextflow.config](https://github.com/SystemsGenetics/GEMmaker/blob/master/nextflow.config.example):
+ - Line 31 Set ```remote_list_path``` to ```"/home/worker/GEMmaker/UnitTestSRAs.txt"``` 
+ - Line 40 Set ```local_samples_path``` to ```"none"```
+ - Line 57 Set ```reference_path``` to ```"/home/worker/GEMmaker/reference"```
+ - Line 63 Set ```reference_prefix``` to ```"TAIR10_Araport11"``` 
+ - Line 125 Set ```threads``` to ```48``` 
+ - Line 368 Set ```queue``` to ```"docker"```
+
+**DEMO** More tweaking may be needed. 
+
+ - Delete Line 104 of [main.nf](https://github.com/SystemsGenetics/GEMmaker/blob/master/main.nf)
 
 #### Deployment
 
