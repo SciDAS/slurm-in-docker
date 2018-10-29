@@ -97,9 +97,10 @@ Finally, navigate to ```/mnt/gv0``` and run ```mkdir home .secret modules module
 
 Because the infinite nature of workflow-specific software, slurm-in-docker cannot come preconfigured with all the software a workflow depends on. Dependencies will be handled by the [LMod](https://lmod.readthedocs.io/en/latest/) module system. The user can use existing modules, but will likely have to build them using the [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) framework. After all modules are built, the generated .tar.gz and .lua files will need to be tranferred to the GFS servers. 
 
-Create modules/modulefiles folders in ```./data-port``` with ```mkdir modules modulefiles```.
+Create modules/modulefiles folders in ```/mnt/data-port``` with ```mkdir modules modulefiles```.
 
 Create a folder for each piece of software within each directory using ```mkdir -p modules/git modulefiles/git```.
+
 
 Copy generated files into each directory using ```cp ./2.17.0 modulefiles/git``` and ```cp ./git-2.17.0.tar.gz modules/git```.
 
