@@ -192,10 +192,15 @@ _slurmdbd() {
   fi
 #  /usr/sbin/slurmdbd
   echo "Copying to ./secret"
-  cp /etc/slurm/slurmdbd.conf /.secret/slurmdbd.conf
+  df -h /.secret/
+    while [ ! -f /.secret/slurm.conf ]; do
+      echo -n "."
+      sleep 1
+      cp --verbose -f /etc/slurm/slurmdbd.conf /.secret/
+    done
+  echo "Done!"
   echo "Starting slurmdbd...."
   /usr/sbin/slurmdbd -Dvvv ### enable for debugging (comment out call above)
-  echo "Done!"
 }
 
 _node_name_etc_hosts() {
