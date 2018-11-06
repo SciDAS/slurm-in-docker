@@ -48,7 +48,7 @@ cat > ./$NAME.json <<EOF
       ],
       "env":
       {
-        "NODE_NAME": "@controller",
+        "NODE_NAME": "@controller controller",
         "USE_SLURMDBD": "true",
         "CLUSTER_NAME": "snowflake",
         "CONTROL_MACHINE":"@controller",
@@ -84,7 +84,7 @@ cat > ./$NAME.json <<EOF
       "is_privileged": true,
       "env":
       {
-        "NODE_NAME": "@db",
+        "NODE_NAME": "@db db",
         "DBD_ADDR": "@db",
         "DBD_HOST": "localhost",
         "DBD_PORT": "6819",
@@ -121,7 +121,7 @@ cat >> ./$NAME.json <<EOF
       "is_privileged": true,
       "env":
       {
-        "NODE_NAME": "${WORKERS[$i-1]}",
+        "NODE_NAME": "${AWORKERS[$i-1]} ${WORKERS[$i-1]}",
         "CONTROL_MACHINE":"@controller",
         "ACCOUNTING_STORAGE_HOST": "@db",
         "COMPUTE_NODES": "${AWORKERS[@]}",

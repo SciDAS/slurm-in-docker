@@ -26,6 +26,20 @@ Finally, you must have the address to a SciDAS Endpoint. An example using port 9
 3. [Modules](Modules) - Build [LMod](https://lmod.readthedocs.io/en/latest/) modules using the [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) framework, or use those already available to easily provide system-wide access to workflow software.
 4. [SciApp](SciApp) - Configure and submit a SciApp using the [SciDAS API](http://129.114.108.45:9191/api/ui) to deploy your personalized cluster on a SciDAS Endpoint.
 5. [GEMmaker](GEMmaker) - As an example use case, download and deploy [GEMmaker](https://github.com/SystemsGenetics/GEMmaker), a scientific workflow, across the entire cluster.
+6. [Takedown](Takedown) - Take down the cluster with a simple command.
+
+### Definitions
+
+**Execution Environments** 
+
+ - **Local Machine**: The user's local staging point that they use for basic computation(ex. laptop, desktop PC).
+ - **GFS Client**: A GFS "client" container running on the user's local machine. 
+ - **SciApp**: The running Slurm SciApp. The user should have a SSH connection from their local machine to a shell inside the SciApp.
+
+**Directories**
+
+ - **${SLURM_IN_DOCKER}**: Path to slurm-in-docker repository. (ex. ```/home/slurm-in-docker```)
+ - **${LMODS_DOCKER_CENTOS}**: Path to lmods-docker-centos repository. (ex. ```/home/lmods-docker-centos```)
 
 ## GlusterFS
 
@@ -63,7 +77,7 @@ If the GFS stack deployed successfully, it should be possible to mount to it thr
 
 ### Configuration
 
-From a local terminal, navigate to ```slurm-in-docker/gfs-client/client``` and open [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/glusterfs/gfs-client/client/docker-compose.yml). E
+From the **Local Machine**, navigate to ```**${SLURM_IN_DOCKER}**/gfs-client/client``` and open [docker-compose.yml](https://github.com/SciDAS/slurm-in-docker/blob/glusterfs/gfs-client/client/docker-compose.yml). 
 
 Edit the ```EXTRA_HOSTS``` and ```GFS_SERVERS``` arguments to something like the 3-node example below:
 ```
@@ -76,13 +90,13 @@ GFS_SERVERS: 'glusterfs' # <-- node_name from above
 
 ### Deployment
 
-To start the container, simply run ```docker-compose up```. Monitor the mounting for any errors. 
+To start the container, simply run ```docker-compose up``` in ```**${SLURM_IN_DOCKER}**/gfs-client/client```. Monitor the mounting for any errors. 
 
 After the client has succesfully mounted, open a new terminal and enter ```docker exec -ti client /bin/bash``` to enter the container.
 
 Navigate to ```/mnt``` and check to make sure the local docker volume ```/mnt/data-port``` and the GFS volume ```/mnt/gv0``` are present. 
 
-Confirm there is a ```./data-port``` in your local ```slurm-in-docker/gfs-client/client``` directory, then test by moving a small file into ```data-port/``` from your local machine then into ```/mnt/gv0``` from the client container. 
+Confirm there is a ```./data-port``` in your local ```**${SLURM_IN_DOCKER}**/gfs-client/client``` directory, then test by moving a small file into ```data-port/``` from your local machine then into ```/mnt/gv0``` from the client container. 
 
 This is how data can easily be transferred between the local machine and the SciApp.
 
@@ -97,12 +111,18 @@ Finally, navigate to ```/mnt/gv0``` and run ```mkdir home .secret modules module
 
 Because the infinite nature of workflow-specific software, slurm-in-docker cannot come preconfigured with all the software a workflow depends on. Dependencies will be handled by the [LMod](https://lmod.readthedocs.io/en/latest/) module system. The user can use existing modules, but will likely have to build them using the [lmod-modules-centos](https://github.com/scidas/lmod-modules-centos) framework. After all modules are built, the generated .tar.gz and .lua files will need to be tranferred to the GFS servers. 
 
-Create modules/modulefiles folders in ```/mnt/data-port``` with ```mkdir modules modulefiles```.
+
+Inside the **GFS Client**:
+
+Create modules/modulefiles folders in ```/mnt/data-port``` with ```mkdir -p /mnt/data-port/modules /mnt/data-port/modulefiles```.
 
 Create a folder for each piece of software within each directory using ```mkdir -p modules/git modulefiles/git```.
 
+Copy generated files into each directory using:
 
-Copy generated files into each directory using ```cp ./2.17.0 modulefiles/git``` and ```cp ./git-2.17.0.tar.gz modules/git```.
+```cp **${LMODS_DOCKER_CENTOS}**/{NAME}/{VERSION}/{VERSION}.lua modulefiles/{NAME}``` and ```cp **${LMODS_DOCKER_CENTOS}**/{NAME}/{VERSION}/{NAME}-{VERSION}.tar.gz modules/{NAME}```
+
+ex. ```cp **${LMODS_DOCKER_CENTOS}**/git/2.17.0/2.17.0.lua modulefiles/git``` and ```cp **${LMODS_DOCKER_CENTOS}**/git/2.17.0/git-2.17.0.tar.gz modules/git```
 
 Untar the module with ```tar -xzf git-2.17.0.tar.gz```. 
 
@@ -118,9 +138,11 @@ The slurm-in-docker SciApp will instantiate a [Slurm](https://slurm.schedmd.com/
 
 ### Configuration
 
+From the **Local Machine** in ```**${SLURM_IN_DOCKER}**/sciapp```
+
 Open [slurm-gfs.json](https://github.com/SciDAS/slurm-in-docker/blob/glusterfs/sciapp/slurm-gfs.json) and modify it to fit your specific needs. 
 
-You can also use the script *generate.sh* to generate frameworks. 
+You can also use the script [generate.sh](https://github.com/SciDAS/slurm-in-docker/blob/glusterfs/sciapp/generate.sh) to generate frameworks. 
 
 Required Arguments:
  - $1: SciApp name
@@ -190,13 +212,15 @@ The user will access the running cluster by SSHing into the "controller" node. T
 
 First, find the external IP of "controller" by visiting ```http://{endpointIP}:9191/appliance/{appName}/ui```. The IP will be listed beside the controller node.
 
-In the client container running locally, go to the directory ```/mnt/gv0/.secret/root_ssh_controller/```
+In the **GFS Client** container, go to the directory ```/mnt/gv0/.secret/root_ssh_controller/```
 
 If the startup was successful, the command ```ls``` should ouput ```id_rsa id_rsa.pub```, the public and private keys shared by the cluster. 
 
-Copy these keys to your local ```~/.ssh``` folder(not inside the client container). It is recommended that the keys be removed from the GFS server at this point for security purposes. 
+Copy these keys to your ```~/.ssh``` folder on the **Local Machine**.
 
-In your local ```~/.ssh``` folder:
+
+
+In the ```~/.ssh``` folder on the **Local Machine**:
 
 Set proper permissions for the new key pair with ```chmod 700 id_rsa id_rsa.pub```
 
@@ -279,7 +303,7 @@ Submit jobs, store data, or any other actions that do not require root permissio
 
 ## GEMmaker
 
-**Switch to worker user.**
+**Switch to worker user.** ```su - worker```
 
 Any Nextflow-compatible workflow can be run with slurm-in-docker. As an example slurm-in-docker use case, the next section will detail the steps required to deploy [GEMmaker](https://github.com/SystemsGenetics/GEMmaker), a scientific workflow, across the entire cluster, a workflow that generates Gene Expression Matricies from raw RNA sequences. This will cover using Nextflow workflow manager, adding python3 packages, and more useful slurm-in-docker skills. 
 
@@ -309,7 +333,7 @@ Download the reference annotation files with ```iget -rf /scidasZone/sysbio/expe
 
 ### Python3
 
-**You must be root to add packages.**
+**You must be root to add packages.** 
 
 Many applications require Python2.7 or Python3. Most require specific packages that are not available by default. Since all nodes use the same environment modules, it is possible to add new python packages at any point. Here we will outline adding the packages required by the GEMmaker workflow. 
 
@@ -321,7 +345,7 @@ If not, determine the required packages and add them with ```python3 -m pip inst
 
 ### Nextflow
 
-**Switch back to worker user.**
+**Switch back to worker user.** ```su - worker```
 
 Add nextflow with ```module add java nextflow```
 
@@ -352,4 +376,11 @@ If any errors are encountered, fix them and resume with ```nextflow run main.nf 
 To generate a GEM out of the FPKMs/TPMs, run ```python3 ./scripts/create_GEM.py --source ./ --type TPM --prefix unitTest```
 
 The generated GEM will be the file ```unitTest.GEM.TPM.txt```
+
+## Takedown
+
+After all necesary computation has completed, the cluster can be taken down with ```curl -X DELETE http://{endpointIP}:9191/appliance/{appName}```
+
+**DEMO** Take down with ```curl -X DELETE http://129.114.108.45:9191/appliance/slurm```
+
 
