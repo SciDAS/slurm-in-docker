@@ -69,9 +69,14 @@ Look at GEM with ```head my_project.GEM.TPM.txt```
 
 If you want to show iRODS connectivity, add the icommands with ```module add irods-icommands```
 
-Run ```iinit```, enter in your credentials.
+Run ```iinit```, enter in your redentials.
 
 Test with ```ils``` 
+
+
+**Shutdown**
+
+Deprovision the cluster with ```curl -X DELETE http://129.114.108.45:9191/appliance/slurm```
 
 
 
