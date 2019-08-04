@@ -1,4 +1,4 @@
-FROM scidas/slurm.base:17.11.5
+FROM scidas/slurm.base:19.05.1
 MAINTAINER Michael J. Stealey <stealey@renci.org>
 
 # install openmpi 3.0.1

@@ -376,7 +376,7 @@ services:
     build:
       context: ./controller
       dockerfile: Dockerfile
-    image: scidas/slurm.controller:17.11.5
+    image: scidas/slurm.controller:19.05.1
     deploy:
       replicas: 1
       restart_policy:
@@ -405,7 +405,7 @@ services:
     build:
       context: ./database
       dockerfile: Dockerfile
-    image: scidas/slurm.database:17.11.5
+    image: scidas/slurm.database:19.05.1
     deploy:
       replicas: 1
       restart_policy:
@@ -434,7 +434,7 @@ services:
     build:
       context: ./worker
       dockerfile: Dockerfile
-    image: scidas/slurm.worker:17.11.5
+    image: scidas/slurm.worker:19.05.1
     deploy:
       replicas: 1
       restart_policy:
@@ -459,7 +459,7 @@ services:
     build:
       context: ./worker
       dockerfile: Dockerfile
-    image: scidas/slurm.worker:17.11.5
+    image: scidas/slurm.worker:19.05.1
     deploy:
       replicas: 1
       restart_policy:

@@ -8,7 +8,7 @@ This work represents a small exploratory Slurm cluster using CentOS 7 based Dock
 
 Images include:
 
-- [Slurm 17.11.5](https://slurm.schedmd.com) - installed from [rpm packages](packages)
+- [Slurm 19.05.1](https://slurm.schedmd.com) - installed from [rpm packages](packages)
 - [OpenMPI 3.0.1](https://www.open-mpi.org/doc/current/) - installed from [rpm packages](packages)
 - [Lmod 7.7](http://lmod.readthedocs.io/en/latest/index.html) - installed from [distribution files](https://sourceforge.net/projects/lmod/files/)
   - [Lmod module packages for CentOS 7](https://github.com/scidas/lmod-modules-centos) - Organized for Slurm-in-Docker use
@@ -77,7 +77,7 @@ cp -r ../packages/centos-7/rpms .
 Build the base image
 
 ```
-docker build -t scidas/slurm.base:17.11.5 .
+docker build -t scidas/slurm.base:19.05.1 .
 ```
 
 Verify image build
@@ -85,11 +85,11 @@ Verify image build
 ```console
 $ docker images
 REPOSITORY             TAG                 IMAGE ID            CREATED                  SIZE
-scidas/slurm.base   17.11.5             1600621cb483        Less than a second ago   819MB
+scidas/slurm.base   19.05.1             1600621cb483        Less than a second ago   819MB
 ...
 ```
 
-All images defined in `docker-compose.yml` will be built from the `scidas/slurm.base:17.11.5` base image
+All images defined in `docker-compose.yml` will be built from the `scidas/slurm.base:19.05.1` base image
 
 ## Usage
 
@@ -104,10 +104,10 @@ Four containers should be observed running when completed
 ```console
 $ docker ps
 CONTAINER ID        IMAGE                                COMMAND                  CREATED             STATUS              PORTS                                              NAMES
-995183e9391e        scidas/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker01
-bdd7c8daaca2        scidas/slurm.database:17.11.5     "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   database
-a8382a486989        scidas/slurm.worker:17.11.5       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker02
-24e951854109        scidas/slurm.controller:17.11.5   "/usr/local/bin/tini…"   11 seconds ago      Up 31 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   controller
+995183e9391e        scidas/slurm.worker:19.05.1       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker01
+bdd7c8daaca2        scidas/slurm.database:19.05.1     "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   database
+a8382a486989        scidas/slurm.worker:19.05.1       "/usr/local/bin/tini…"   10 seconds ago      Up 30 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   worker02
+24e951854109        scidas/slurm.controller:19.05.1   "/usr/local/bin/tini…"   11 seconds ago      Up 31 seconds       22/tcp, 3306/tcp, 6817-6819/tcp, 60001-63000/tcp   controller
 ```
 
 ## Examples using Slurm

@@ -1,7 +1,7 @@
 FROM krallin/centos-tini:7
 MAINTAINER Michael J. Stealey <stealey@renci.org>
 
-ENV SLURM_VERSION=17.11.5 \
+ENV SLURM_VERSION=19.05.1 \
   MUNGE_UID=981 \
   SLURM_UID=982 \
   WORKER_UID=1000
@@ -29,7 +29,7 @@ RUN yum -y install \
   openssh-server \
   openssh-clients
 
-# install slurm 17.11.5
+# install slurm 19.05.1
 COPY rpms /packages
 # /usr/bin/mpiexec from slurm-torque conflicts with openmpi install
 WORKDIR /packages
