@@ -75,10 +75,8 @@ _generate_slurm_conf() {
 # See the slurm.conf man page for more information.
 #
 ClusterName=$CLUSTER_NAME
-ControlMachine=$CONTROL_MACHINE
-#ControlAddr=
-#BackupController=
-#BackupAddr=
+SlurmctldHost=$CONTROL_MACHINE
+#SlurmctldHostr=
 #
 SlurmUser=slurm
 #SlurmdUser=root
