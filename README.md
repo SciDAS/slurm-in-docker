@@ -31,7 +31,7 @@ An example [docker-compose.yml](docker-compose.yml) file is provided that builds
 Listing of participating containers with FQDNs and their function within the cluster.
 
 Container | Function | FQDN
-:-------- | :------- | :--- 
+:-------- | :------- | :---
 controller | Slurm Primary Controller | controller.local.dev
 database | Slurm Primary Database Daemon | database.local.dev
 worker01 | Slurm Worker | worker01.local.dev
@@ -39,13 +39,13 @@ worker02 | Slurm Worker | worker02.local.dev
 
 ## Configure slurm.conf/slurmdbd.conf
 
-Users may use the default slurm.conf file generated in [docker-entrypoint.sh](https://github.com/SciDAS/slurm-in-docker/blob/master/controller/docker-entrypoint.sh), or preferably create one to better fit their system. 
+Users may use the default slurm.conf file generated in [docker-entrypoint.sh](https://github.com/SciDAS/slurm-in-docker/blob/master/controller/docker-entrypoint.sh), or preferably create one to better fit their system.
 
-The [Slurm Version 17.11 Configuration Tool](https://slurm.schedmd.com/configurator.html) is a useful resource for creating custom slurm.conf files.
+The [Slurm Configuration Tool](https://slurm.schedmd.com/configurator.html) is a useful resource for creating custom slurm.conf files.
 
 Steps to add user profided slurm.conf/slurmdbd.conf:
 
-1. Create ```home/config``` and ```secret``` directories: 
+1. Create ```home/config``` and ```secret``` directories:
 
 ```
 mkdir -p home/config secret
