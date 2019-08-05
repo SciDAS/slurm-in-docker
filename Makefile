@@ -1,12 +1,14 @@
 subdir = packages base controller worker database
 
-.PHONY: all build clean $(subdir)
+.PHONY: all build clean test $(subdir)
 
 all: build
 
 build: $(subdir)
 
 clean: $(subdir)
+
+test: $(subdir)
 
 controller worker database: base
 

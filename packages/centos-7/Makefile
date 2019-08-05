@@ -4,7 +4,7 @@ IMAGE = scidas/slurm.rpms
 
 DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: all build clean
+.PHONY: all build clean test
 
 all: build
 
@@ -19,3 +19,5 @@ rpms:
 clean:
 	@[ -z $(docker images -q $(IMAGE):$(SLURM_VERSION)) ] || docker rmi $(IMAGE):$(SLURM_VERSION)
 	rm -rf rpms
+
+test:
