@@ -1,9 +1,10 @@
 .PHONY: all build clean test
 
-all: build tests
+all: test
 
 build:
 
 clean:
 
 test:
+	bash test.sh

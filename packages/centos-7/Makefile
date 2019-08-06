@@ -19,5 +19,3 @@ rpms:
 clean:
 	@[ -z $(docker images -q $(IMAGE):$(SLURM_VERSION)) ] || docker rmi $(IMAGE):$(SLURM_VERSION)
 	rm -rf rpms
-
-test:

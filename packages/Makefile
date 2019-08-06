@@ -6,8 +6,6 @@ all: build
 
 build: $(subdir)
 
-test: $(subdir)
-
 clean: $(subdir)
 
 $(subdir):

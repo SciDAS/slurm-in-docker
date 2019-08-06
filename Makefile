@@ -8,7 +8,8 @@ build: $(subdir)
 
 clean: $(subdir)
 
-test: $(subdir)
+test:
+	$(MAKE) -C $@
 
 controller worker database: base
 

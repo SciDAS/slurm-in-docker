@@ -12,8 +12,6 @@ build:
 	cp -r "$(DIR)/../packages/centos-7/rpms" .
 	docker build -t $(IMAGE):$(SLURM_VERSION) .
 
-test:
-
 clean:
 	@[ -z $(docker images -q $(IMAGE):$(SLURM_VERSION)) ] || docker rmi $(IMAGE):$(SLURM_VERSION)
 	rm -rf rpms

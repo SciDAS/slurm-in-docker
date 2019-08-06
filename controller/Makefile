@@ -10,7 +10,5 @@ all: build
 build:
 	docker build -t $(IMAGE):$(SLURM_VERSION) .
 
-test:
-
 clean:
 	@[ -z $(docker images -q $(IMAGE):$(SLURM_VERSION)) ] || docker rmi $(IMAGE):$(SLURM_VERSION)
