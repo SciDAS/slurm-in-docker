@@ -22,34 +22,52 @@ else
   BOLD=$(echo -en "\e[01m")
 fi
 
-drun() {
-  docker exec -t -u worker "$1" "${@:2}"
-}
-
-cleanup() {
-  docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" down
-  rm -rf "${DIR}/../home" "${DIR}/../secret"
-}
-
-setup() {
-
-  cleanup
-  docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" up -d
-
+polling() {
   local start
 
   start="$(date +"%s")"
 
   local diff=$(( $(date +"%s") - start ))
-  local wait=30
+  local wait="$1"
 
-  # check controller status
+  shift
+
   while [ $diff -lt $wait  ]; do
-    docker logs "$CONTROLLER" 2>/dev/null | grep "Adding Cluster(s)" && break
+    "$@" && break
     diff=$(( $(date +"%s") - start  ))
   done
 
   [ $diff -lt $wait  ] || return 1
+}
+
+drun() {
+  docker exec -t -u worker "$1" "${@:2}"
+}
+
+cleanup() {
+  is_contain_dead() {
+    [ "$(docker ps -q -f name="$1")" == "" ] || return 1
+  }
+
+  clean_dir() {
+    rm -rf "$1"
+    [ ! -d "$1" ] || return 1
+  }
+
+  docker-compose --log-level ERROR -f "${DIR}/../${DOCKER_COMPOSE}" down
+
+  for c in $CONTAINERS; do
+    polling 10 is_contain_dead "$c" || return 1
+  done
+
+  for d in "${DIR}/../home" "${DIR}/../secret"; do
+    polling 10 clean_dir "$d" || return 1
+  done
+}
+
+setup() {
+  cleanup
+  docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" up -d
 }
 
 teardown() {
@@ -57,26 +75,27 @@ teardown() {
 }
 
 check_slurm_status() {
+
+  is_container_running() {
+    [ "$(docker inspect -f '{{.State.Running}}' "$1")" == "true" ] || return 1
+  }
+
   for c in $CONTAINERS; do
-    [ "$(docker inspect -f '{{.State.Running}}' "$c")" == "true" ] || return 1
+    polling 10 is_container_running "$c"
   done
 }
 
 check_slurm_sinfo() {
   local start
+  is_controller_ready() {
+    docker logs "$CONTROLLER" 2>/dev/null | grep "Adding Cluster(s)"
+  }
+  polling 30 is_controller_ready || return 1
 
-  start="$(date +"%s")"
-
-  local diff=$(( $(date +"%s") - start ))
-  local wait=30
-
-  # check all workers' status should be idle
-  while [ $diff -lt $wait ]; do
+  is_worker_ready() {
     drun "$CONTROLLER" sinfo 2>&1 | grep "worker\[01-02\]" | grep "idle" && break
-    diff=$(( $(date +"%s") - start  ))
-  done
-
-  [ $diff -lt $wait  ] || return 1
+  }
+  polling 30 is_worker_ready || return 1
 }
 
 check_slurm_srun() {
