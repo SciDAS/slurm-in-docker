@@ -11,7 +11,7 @@ WORKER02="worker02"
 CONTAINERS="$CONTROLLER $DATABASE $WORKER01 $WORKER02"
 
 drun() {
-  docker exec -it "$1" "${@:2}"
+  docker exec -t "$1" "${@:2}"
 }
 
 cleanup() {
@@ -23,12 +23,20 @@ setup() {
   cleanup
   docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" up -d
 
-  # check cluster status
-  local s=1
-  for _ in $(seq 1 3); do
-    docker logs "$CONTROLLER" 2>/dev/null | grep "Adding Cluster(s)" && s=0 && break || s=$? && sleep 3
+  local start
+
+  start="$(date +"%s")"
+
+  local diff=$(( $(date +"%s") - start ))
+  local wait=30
+
+  # check controller status
+  while [ $diff -lt $wait  ]; do
+    docker logs "$CONTROLLER" 2>/dev/null | grep "Adding Cluster(s)" && break
+    diff=$(( $(date +"%s") - start  ))
   done
-  return "$(exit $s)"
+
+  [ $diff -lt $wait  ] || return 1
 }
 
 teardown() {
@@ -101,10 +109,108 @@ sbatch --array=1-20%2 "$SBATCH_FILE"
 
 }
 
-setup
-check_slurm_status
-check_slurm_sinfo
-check_slurm_srun
-check_slurm_sbatch
-check_slurm_sbatch_array
-teardown
+check_slurm_mpi() {
+
+  drun -u "worker" "$CONTROLLER" bash -c '
+MPI_HELLO="/tmp/mpi_hello.c"
+cat <<EOF > "$MPI_HELLO"
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define  MASTER 0
+
+int main (int argc, char *argv[]) {
+   int   numtasks, taskid, len;
+   char hostname[MPI_MAX_PROCESSOR_NAME];
+
+   MPI_Init(&argc, &argv);
+   MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+   MPI_Comm_rank(MPI_COMM_WORLD,&taskid);
+   MPI_Get_processor_name(hostname, &len);
+
+   printf ("Hello from task %d on %s!\n", taskid, hostname);
+
+   if (taskid == MASTER)
+      printf("MASTER: Number of MPI tasks is: %d\n",numtasks);
+
+   MPI_Finalize();
+   return 0;
+}
+EOF
+
+cd /tmp
+mpicc mpi_hello.c -Wall -Wextra -O3 -pedantic -Wl,--as-needed -o mpi_hello.out
+scp mpi_hello.out worker@worker01:/tmp
+scp mpi_hello.out worker@worker02:/tmp
+
+srun --mpi=openmpi mpi_hello.out
+srun -N 2 --mpi=openmpi mpi_hello.out
+srun -N 2 --mpi=pmi2 mpi_hello.out
+' || return 1
+
+
+  # test sbatch
+  drun "$CONTROLLER" bash -c '
+MPI_BATCH=/tmp/mpi_batch.job
+cat <<EOF > "$MPI_BATCH"
+#!/bin/bash
+
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH -t 24:00:00
+###################
+## %A == SLURM_ARRAY_JOB_ID
+## %a == SLURM_ARRAY_TASK_ID (or index)
+#SBATCH -o /tmp/mpi_out/%A_%a_out.txt
+#SBATCH -e /tmp/mpi_out/%A_%a_err.txt
+
+snooze=$(( ( RANDOM % 10 )  + 1 ))
+sleep $snooze
+
+srun -N 2 --mpi=openmpi mpi_hello.out
+EOF
+
+mkdir -p /tmp/mpi_out
+cd /tmp
+sbatch -N 2 --array=1-5%1 mpi_batch.job
+' || return 1
+
+}
+
+summary() {
+
+  local tests=(
+    check_slurm_status
+    check_slurm_sinfo
+    check_slurm_srun
+    check_slurm_sbatch
+    check_slurm_sbatch_array
+    check_slurm_mpi
+  )
+
+
+  local rc=0
+  local num=1
+
+  echo "1..${#tests[@]}"
+
+  setup
+
+  for t in "${tests[@]}"; do
+
+    $t  # run the test
+
+    if [ $? -eq 0 ]; then
+      echo "ok $num - $t"
+    else
+      echo "not ok $num - $t"
+      rc=1
+    fi
+
+  done
+
+  teardown
+  return $rc
+}
+
+summary
