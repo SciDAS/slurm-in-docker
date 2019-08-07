@@ -10,16 +10,29 @@ WORKER01="worker01"
 WORKER02="worker02"
 CONTAINERS="$CONTROLLER $DATABASE $WORKER01 $WORKER02"
 
+if command -v tput &>/dev/null; then
+  RED=$(tput setaf 1)
+  GREEN=$(tput setaf 2)
+  NORMAL=$(tput sgr0)
+  BOLD=$(tput bold)
+else
+  RED=$(echo -en "\e[31m")
+  GREEN=$(echo -en "\e[32m")
+  NORMAL=$(echo -en "\e[00m")
+  BOLD=$(echo -en "\e[01m")
+fi
+
 drun() {
-  docker exec -t "$1" "${@:2}"
+  docker exec -t -u worker "$1" "${@:2}"
 }
 
 cleanup() {
-  rm -rf "${DIR}/../home" "${DIR}/../secret"
   docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" down
+  rm -rf "${DIR}/../home" "${DIR}/../secret"
 }
 
 setup() {
+
   cleanup
   docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" up -d
 
@@ -45,12 +58,26 @@ teardown() {
 
 check_slurm_status() {
   for c in $CONTAINERS; do
-    [ "$(docker inspect -f '{{.State.Running}}' "$c")" = true ] || return 1
+    [ "$(docker inspect -f '{{.State.Running}}' "$c")" == "true" ] || return 1
   done
 }
 
 check_slurm_sinfo() {
-  drun "$CONTROLLER" sinfo || return 1
+  local start
+
+  start="$(date +"%s")"
+
+  local diff=$(( $(date +"%s") - start ))
+  local wait=30
+
+  # check all workers' status should be idle
+  while [ $diff -lt $wait ]; do
+    drun "$CONTROLLER" sinfo 2>&1 | grep "worker\[01-02\]" | grep "idle" && break
+    diff=$(( $(date +"%s") - start  ))
+  done
+
+  echo $diff $wait
+  [ $diff -lt $wait  ] || return 1
 }
 
 check_slurm_srun() {
@@ -59,7 +86,7 @@ check_slurm_srun() {
 
 check_slurm_sbatch() {
   drun "$CONTROLLER" bash -c '
-SBATCH_FILE="/tmp/slurm_test.job"
+SBATCH_FILE="/home/worker/slurm_test.job"
 cat <<EOF > "$SBATCH_FILE"
 #!/bin/bash
 
@@ -71,6 +98,7 @@ cat <<EOF > "$SBATCH_FILE"
 srun hostname | sort
 EOF
 
+cd /home/worker
 sbatch -N 2 $SBATCH_FILE
 ' || return 1
 
@@ -80,7 +108,7 @@ sbatch -N 2 $SBATCH_FILE
 
 check_slurm_sbatch_array() {
   drun "$CONTROLLER" bash -c '
-SBATCH_FILE="/tmp/array_test.job"
+SBATCH_FILE="/home/worker/array_test.job"
 cat <<EOF > "$SBATCH_FILE"
 #!/bin/bash
 
@@ -91,17 +119,18 @@ cat <<EOF > "$SBATCH_FILE"
 ## %A == SLURM_ARRAY_JOB_ID
 ## %a == SLURM_ARRAY_TASK_ID (or index)
 ## %N == SLURMD_NODENAME (directories made ahead of time)
-#SBATCH -o /tmp/%N/%A_%a_out.txt
-#SBATCH -e /tmp/%N/%A_%a_err.txt
+#SBATCH -o %N/%A_%a_out.txt
+#SBATCH -e %N/%A_%a_err.txt
 
-snooze=$(( ( RANDOM % 10 )  + 1 ))
-echo "$(hostname) is snoozing for ${snooze} seconds..."
+snooze=\$(( ( RANDOM % 10 )  + 1 ))
+echo "\$(hostname) is snoozing for \${snooze} seconds..."
 
-sleep $snooze
+sleep \$snooze
 EOF
 
-mkdir -p /tmp/worker01 /tmp/worker02
 sinfo -N
+mkdir -p /home/worker/worker01 /home/worker/worker02
+cd /home/worker
 sbatch --array=1-20%2 "$SBATCH_FILE"
 ' || return 1
 
@@ -111,8 +140,8 @@ sbatch --array=1-20%2 "$SBATCH_FILE"
 
 check_slurm_mpi() {
 
-  drun -u "worker" "$CONTROLLER" bash -c '
-MPI_HELLO="/tmp/mpi_hello.c"
+  drun "$CONTROLLER" bash -c '
+MPI_HELLO="/home/worker/mpi_hello.c"
 cat <<EOF > "$MPI_HELLO"
 #include <mpi.h>
 #include <stdio.h>
@@ -138,10 +167,10 @@ int main (int argc, char *argv[]) {
 }
 EOF
 
-cd /tmp
+cd /home/worker
 mpicc mpi_hello.c -Wall -Wextra -O3 -pedantic -Wl,--as-needed -o mpi_hello.out
-scp mpi_hello.out worker@worker01:/tmp
-scp mpi_hello.out worker@worker02:/tmp
+scp mpi_hello.out worker@worker01:/home/worker
+scp mpi_hello.out worker@worker02:/home/worker
 
 srun --mpi=openmpi mpi_hello.out
 srun -N 2 --mpi=openmpi mpi_hello.out
@@ -151,7 +180,7 @@ srun -N 2 --mpi=pmi2 mpi_hello.out
 
   # test sbatch
   drun "$CONTROLLER" bash -c '
-MPI_BATCH=/tmp/mpi_batch.job
+MPI_BATCH=/home/worker/mpi_batch.job
 cat <<EOF > "$MPI_BATCH"
 #!/bin/bash
 
@@ -161,19 +190,21 @@ cat <<EOF > "$MPI_BATCH"
 ###################
 ## %A == SLURM_ARRAY_JOB_ID
 ## %a == SLURM_ARRAY_TASK_ID (or index)
-#SBATCH -o /tmp/mpi_out/%A_%a_out.txt
-#SBATCH -e /tmp/mpi_out/%A_%a_err.txt
+#SBATCH -o mpi_out/%A_%a_out.txt
+#SBATCH -e mpi_out/%A_%a_err.txt
 
-snooze=$(( ( RANDOM % 10 )  + 1 ))
-sleep $snooze
+snooze=\$(( ( RANDOM % 10 )  + 1 ))
+sleep \$snooze
 
 srun -N 2 --mpi=openmpi mpi_hello.out
 EOF
 
-mkdir -p /tmp/mpi_out
-cd /tmp
-sbatch -N 2 --array=1-5%1 mpi_batch.job
+mkdir -p /home/worker/mpi_out
+cd /home/worker
+sbatch -N 2 --array=1-5%1 $MPI_BATCH
 ' || return 1
+
+  drun "$CONTROLLER" sacct || return 1
 
 }
 
@@ -194,19 +225,17 @@ summary() {
 
   echo "1..${#tests[@]}"
 
-  setup
+  # retry setup
+  setup || return 1
 
   for t in "${tests[@]}"; do
-
-    $t  # run the test
-
-    if [ $? -eq 0 ]; then
-      echo "ok $num - $t"
+    # run the test
+    if $t ; then
+      echo "${BOLD}${GREEN}ok${NORMAL} $num - $t"
     else
-      echo "not ok $num - $t"
       rc=1
+      echo "${BOLD}${RED}not ok${NORMAL} $num - $t"
     fi
-
   done
 
   teardown
