@@ -76,7 +76,6 @@ check_slurm_sinfo() {
     diff=$(( $(date +"%s") - start  ))
   done
 
-  echo $diff $wait
   [ $diff -lt $wait  ] || return 1
 }
 
