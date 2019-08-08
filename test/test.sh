@@ -20,6 +20,14 @@ else
   BOLD=$(echo -en "\e[01m")
 fi
 
+# Polling a command or a function
+#
+# Arguments:
+#   max polling time
+#   function or command
+# Return:
+#   0 success 1 fail
+#
 polling() {
   local start
 
@@ -38,19 +46,78 @@ polling() {
   [ "$diff" -lt "$wait"  ] || return 1
 }
 
+# Check whether a docker container is dead or not.
+#
+# Arguments:
+#   container id or name
+# Returns:
+#   0 success 1 fail
+#
 is_contain_dead() {
   [ "$(docker ps -q -f name="$1")" == "" ] || return 1
 }
 
+# Check all jobs are completed.
+#
+# Arguments:
+#   none
+# Returns:
+#   0 success 1 fail
+#
+is_all_completed() {
+
+  # $ sacct -b
+  # check state doesn't contain FAILED
+  #       JobID      State ExitCode
+  # ------------ ---------- --------
+  # 2             COMPLETED      0:0
+  # 3             COMPLETED      0:0
+  # ...
+
+  [ "$(drun "$CONTROLLER" sacct -b | grep -c 'FAILED')" == 0 ] || return 1
+}
+
+# Check whether squeue has job or not.
+#
+# Arguments:
+#   none
+# Returns:
+#   0 no job  1 has jobs
+#
+has_tasks() {
+  [ "$(drun "$CONTROLLER" squeue | wc -l | tr -d '[:space:]')" == 1 ] || return 1
+}
+
+# Clear a directory
+#
+# Arguments:
+#   directory name
+# Returns:
+#   0 success 1 fail
+#
 clean_dir() {
   rm -rf "$1"
   [ ! -d "$1" ] || return 1
 }
 
+# Execute a command in a container as a worker
+#
+# Arguments:
+#   command
+#   arguments
+# Returns:
+#   exit code
 drun() {
   docker exec -t -u worker "$1" "${@:2}"
 }
 
+# Remove home, secret, and related containers
+#
+# Arguments:
+#   none
+# Returns:
+#   0 success 1 fail
+#
 cleanup() {
 
   docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" down
@@ -121,7 +188,8 @@ cd /home/worker
 sbatch -N 2 $SBATCH_FILE
 ' || return 1
 
-  drun "$CONTROLLER" squeue || return 1
+  polling 15 has_tasks || return 1
+  is_all_completed
 
 }
 
@@ -155,8 +223,8 @@ cd /home/worker
 sbatch --array=1-20%2 "$SBATCH_FILE"
 ' || return 1
 
-  drun "$CONTROLLER" squeue || return 1
-
+  polling 600 has_tasks || return 1 # wait for 10 min
+  is_all_completed
 }
 
 check_slurm_mpi() {
@@ -199,6 +267,8 @@ srun -N 2 --mpi=openmpi mpi_hello.out
 srun -N 2 --mpi=pmi2 mpi_hello.out
 ' || return 1
 
+  polling 60 has_tasks || return 1
+  is_all_completed
 
   # test sbatch
 
@@ -228,10 +298,17 @@ cd /home/worker
 sbatch -N 2 --array=1-5%1 $MPI_BATCH
 ' || return 1
 
-  drun "$CONTROLLER" sacct || return 1
-
+  polling 60 has_tasks || return 1
+  is_all_completed
 }
 
+# Run all tests and echo a summary
+#
+# Arguments:
+#   none
+# Returns:
+#   0 success 1 fail
+#
 summary() {
 
   local tests=(
