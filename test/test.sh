@@ -339,7 +339,7 @@ summary() {
     fi
   done
 
-  # teardown
+  teardown
   return $rc
 }
 

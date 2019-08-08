@@ -14,12 +14,14 @@ _sshd_host() {
 
 # slurm database user settings
 _slurm_acct_db() {
-  echo "create database slurm_acct_db;" > $SLURM_ACCT_DB_SQL
-  echo "create user '${STORAGE_USER}'@'${STORAGE_HOST}';" >> $SLURM_ACCT_DB_SQL
-  echo "set password for '${STORAGE_USER}'@'${STORAGE_HOST}' = password('${STORAGE_PASS}');" >> $SLURM_ACCT_DB_SQL
-  echo "grant usage on *.* to '${STORAGE_USER}'@'${STORAGE_HOST}';" >> $SLURM_ACCT_DB_SQL
-  echo "grant all privileges on slurm_acct_db.* to '${STORAGE_USER}'@'${STORAGE_HOST}';" >> $SLURM_ACCT_DB_SQL
-  echo "flush privileges;" >> $SLURM_ACCT_DB_SQL
+  {
+    echo "create database slurm_acct_db;"
+    echo "create user '${STORAGE_USER}'@'${STORAGE_HOST}';"
+    echo "set password for '${STORAGE_USER}'@'${STORAGE_HOST}' = password('${STORAGE_PASS}');"
+    echo "grant usage on *.* to '${STORAGE_USER}'@'${STORAGE_HOST}';"
+    echo "grant all privileges on slurm_acct_db.* to '${STORAGE_USER}'@'${STORAGE_HOST}';"
+    echo "flush privileges;"
+  } >> $SLURM_ACCT_DB_SQL
 }
 
 # start database
