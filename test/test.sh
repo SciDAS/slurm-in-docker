@@ -54,7 +54,7 @@ cleanup() {
     [ ! -d "$1" ] || return 1
   }
 
-  docker-compose --log-level ERROR -f "${DIR}/../${DOCKER_COMPOSE}" down
+  docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" down
 
   for c in $CONTAINERS; do
     polling 10 is_contain_dead "$c" || return 1
