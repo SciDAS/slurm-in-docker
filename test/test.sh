@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#shellcheck disable=SC2016
-
 DIR="$( cd "$(dirname "$0")" || exit ; pwd -P )"
 DOCKER_COMPOSE="docker-compose.yml"
 CONTROLLER="controller"
@@ -32,12 +30,21 @@ polling() {
 
   shift
 
-  while [ $diff -lt $wait  ]; do
+  while [ "$diff" -lt "$wait"  ]; do
     "$@" && break
     diff=$(( $(date +"%s") - start  ))
   done
 
-  [ $diff -lt $wait  ] || return 1
+  [ "$diff" -lt "$wait"  ] || return 1
+}
+
+is_contain_dead() {
+  [ "$(docker ps -q -f name="$1")" == "" ] || return 1
+}
+
+clean_dir() {
+  rm -rf "$1"
+  [ ! -d "$1" ] || return 1
 }
 
 drun() {
@@ -45,14 +52,6 @@ drun() {
 }
 
 cleanup() {
-  is_contain_dead() {
-    [ "$(docker ps -q -f name="$1")" == "" ] || return 1
-  }
-
-  clean_dir() {
-    rm -rf "$1"
-    [ ! -d "$1" ] || return 1
-  }
 
   docker-compose -f "${DIR}/../${DOCKER_COMPOSE}" down
 
@@ -93,7 +92,7 @@ check_slurm_sinfo() {
   polling 30 is_controller_ready || return 1
 
   is_worker_ready() {
-    drun "$CONTROLLER" sinfo 2>&1 | grep "worker\[01-02\]" | grep "idle" && break
+    drun "$CONTROLLER" sinfo 2>&1 | grep "worker\[01-02\]" | grep "idle"
   }
   polling 30 is_worker_ready || return 1
 }
@@ -103,6 +102,8 @@ check_slurm_srun() {
 }
 
 check_slurm_sbatch() {
+  # shellcheck disable=SC2016
+
   drun "$CONTROLLER" bash -c '
 SBATCH_FILE="/home/worker/slurm_test.job"
 cat <<EOF > "$SBATCH_FILE"
@@ -125,6 +126,8 @@ sbatch -N 2 $SBATCH_FILE
 }
 
 check_slurm_sbatch_array() {
+  # shellcheck disable=SC2016
+
   drun "$CONTROLLER" bash -c '
 SBATCH_FILE="/home/worker/array_test.job"
 cat <<EOF > "$SBATCH_FILE"
@@ -157,6 +160,7 @@ sbatch --array=1-20%2 "$SBATCH_FILE"
 }
 
 check_slurm_mpi() {
+  # shellcheck disable=SC2016
 
   drun "$CONTROLLER" bash -c '
 MPI_HELLO="/home/worker/mpi_hello.c"
@@ -197,6 +201,8 @@ srun -N 2 --mpi=pmi2 mpi_hello.out
 
 
   # test sbatch
+
+  # shellcheck disable=SC2016
   drun "$CONTROLLER" bash -c '
 MPI_BATCH=/home/worker/mpi_batch.job
 cat <<EOF > "$MPI_BATCH"
@@ -256,7 +262,7 @@ summary() {
     fi
   done
 
-  teardown
+  # teardown
   return $rc
 }
 
