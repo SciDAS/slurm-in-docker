@@ -75,10 +75,8 @@ _generate_slurm_conf() {
 # See the slurm.conf man page for more information.
 #
 ClusterName=$CLUSTER_NAME
-ControlMachine=$CONTROL_MACHINE
-#ControlAddr=
-#BackupController=
-#BackupAddr=
+SlurmctldHost=$CONTROL_MACHINE
+#SlurmctldHostr=
 #
 SlurmUser=slurm
 #SlurmdUser=root
@@ -186,7 +184,7 @@ _slurmctld() {
     echo "### use provided slurm.conf ###"
     cp /home/config/slurm.conf /etc/slurm/slurm.conf
   fi
-  sacctmgr -i add cluster ${CLUSTER_NAME}
+  sacctmgr -i add cluster "${CLUSTER_NAME}"
   sleep 2s
   /usr/sbin/slurmctld
   cp -f /etc/slurm/slurm.conf /.secret/

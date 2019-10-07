@@ -9,10 +9,8 @@
 # See the slurm.conf man page for more information.
 #
 ClusterName=snowflake
-ControlMachine=controller
-#ControlAddr=
-#BackupController=
-#BackupAddr=
+SlurmctldHost=controller
+#SlurmctldHostr=
 #
 SlurmUser=slurm
 #SlurmdUser=root
