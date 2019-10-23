@@ -26,6 +26,8 @@ _slurm_acct_db() {
 
 # start database
 _mariadb_start() {
+  # mariadb somehow expects `resolveip` to be found under this path; see https://github.com/SciDAS/slurm-in-docker/issues/26
+  ln -s /usr/bin/resolveip /usr/libexec/resolveip
   mysql_install_db
   chown -R mysql: /var/lib/mysql/ /var/log/mariadb/ /var/run/mariadb
   cd /var/lib/mysql
